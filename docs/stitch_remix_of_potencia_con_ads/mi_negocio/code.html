@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Editorial Studio - Mi Negocio</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f5f7f9;
+            color: #2c2f31;
+        }
+        h1, h2, h3, .headline {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        /* Custom range slider styling */
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 24px;
+            width: 24px;
+            border-radius: 50%;
+            background: #4a40e0;
+            cursor: pointer;
+            box-shadow: 0 0 0 4px #9795ff44;
+            margin-top: -10px;
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: #e5e9eb;
+            border-radius: 2px;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary-fixed-dim": "#8885ff",
+                        "on-secondary-fixed": "#004840",
+                        "on-error-container": "#510017",
+                        "tertiary-dim": "#95233b",
+                        "on-secondary-container": "#005c52",
+                        "on-surface-variant": "#595c5e",
+                        "secondary-container": "#62fae3",
+                        "tertiary": "#a53046",
+                        "surface-container-highest": "#d9dde0",
+                        "on-primary-container": "#14007e",
+                        "secondary-fixed": "#62fae3",
+                        "secondary-dim": "#005a50",
+                        "tertiary-fixed-dim": "#ff788b",
+                        "background": "#f5f7f9",
+                        "surface-dim": "#d0d5d8",
+                        "inverse-surface": "#0b0f10",
+                        "primary": "#4a40e0",
+                        "surface-container-low": "#eef1f3",
+                        "surface": "#f5f7f9",
+                        "error": "#b41340",
+                        "primary-dim": "#3d30d4",
+                        "tertiary-container": "#ff909d",
+                        "error-container": "#f74b6d",
+                        "on-tertiary-fixed-variant": "#760726",
+                        "inverse-primary": "#8582ff",
+                        "on-tertiary": "#ffefef",
+                        "on-primary": "#f4f1ff",
+                        "error-container": "#f74b6d",
+                        "on-secondary-fixed-variant": "#00675c",
+                        "on-error": "#ffefef",
+                        "secondary-fixed-dim": "#50ebd5",
+                        "inverse-on-surface": "#9a9d9f",
+                        "surface-bright": "#f5f7f9",
+                        "surface-tint": "#4a40e0",
+                        "on-primary-fixed": "#000000",
+                        "on-tertiary-fixed": "#39000d",
+                        "on-background": "#2c2f31",
+                        "surface-container-high": "#dfe3e6",
+                        "on-secondary": "#c1fff2",
+                        "surface-variant": "#d9dde0",
+                        "primary-fixed": "#9795ff",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container": "#e5e9eb",
+                        "outline-variant": "#abadaf",
+                        "outline": "#747779",
+                        "primary-container": "#9795ff",
+                        "on-primary-fixed-variant": "#1a0099",
+                        "tertiary-fixed": "#ff909d",
+                        "on-surface": "#2c2f31",
+                        "on-tertiary-container": "#67001f",
+                        "secondary": "#00675c"
+                    },
+                    fontFamily: {
+                        "headline": ["Plus Jakarta Sans"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background text-on-background font-body">
+<!-- TopAppBar -->
+<header class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl fixed top-0 w-full z-40 shadow-sm shadow-slate-200/50 dark:shadow-none h-16">
+<div class="flex justify-between items-center h-full px-6 w-full max-w-screen-2xl mx-auto">
+<div class="flex items-center gap-4">
+<span class="text-xl font-bold bg-gradient-to-r from-indigo-600 to-indigo-400 bg-clip-text text-transparent">Editorial Studio</span>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 text-slate-500 hover:bg-slate-50 rounded-full transition-all duration-300">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="p-2 text-slate-500 hover:bg-slate-50 rounded-full transition-all duration-300">
+<span class="material-symbols-outlined">help_outline</span>
+</button>
+<div class="h-8 w-8 rounded-full overflow-hidden ml-2 bg-primary-container flex items-center justify-center">
+<img alt="User profile avatar" class="w-full h-full object-cover" data-alt="professional portrait of a creative entrepreneur in a bright studio setting with soft natural lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCjhKAv5BfX7pDpbD-_D-1YwMyKr783E84P01X_3IhbrP2pO-noMK8oiLgi_p0ib0SPmlteum5gYdJy1UukmrXmhUwhyC3lj6B5D87-rpZsoXhU12omZr3Jj4ZrTfkSwnNpnriB3JwkLgNbbSIhabFOoGz2aNHHZYVf754qZMRevz8NjekH2SnX3UzsexqJtv9m1Ej_E_3iCLaM5-itmoThAAwYXaoN6wGObhzvspO9fYaXbv9bd5eETeIP_CCn42EZ_70X6UDzmdtz"/>
+</div>
+</div>
+</div>
+<div class="bg-slate-100/50 dark:bg-slate-800/50 h-[1px] w-full absolute bottom-0"></div>
+</header>
+<div class="flex min-h-screen pt-16">
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-0 bottom-0 flex flex-col p-4 gap-2 h-screen w-64 bg-[#f5f7f9] dark:bg-slate-950 z-30 pt-20">
+<div class="px-4 mb-6">
+<div class="flex items-center gap-3 mb-1">
+<div class="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-white">
+<span class="material-symbols-outlined">rocket_launch</span>
+</div>
+<div>
+<p class="text-lg font-black text-slate-800 dark:text-slate-100 leading-tight">Marketing Hub</p>
+<p class="text-xs text-slate-500 font-medium">Small Biz Growth</p>
+</div>
+</div>
+</div>
+<nav class="flex flex-col gap-1 flex-grow">
+<!-- Mi Negocio (Active) -->
+<a class="flex items-center gap-3 px-4 py-3 bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 rounded-xl shadow-sm font-['Inter'] text-sm font-medium" href="#">
+<span class="material-symbols-outlined text-indigo-600">storefront</span>
+                    Mi Negocio
+                </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:translate-x-1 transition-transform font-['Inter'] text-sm font-medium hover:text-indigo-500" href="#">
+<span class="material-symbols-outlined">calendar_today</span>
+                    Estrategia
+                </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:translate-x-1 transition-transform font-['Inter'] text-sm font-medium hover:text-indigo-500" href="#">
+<span class="material-symbols-outlined">auto_awesome</span>
+                    Contenido IA
+                </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:translate-x-1 transition-transform font-['Inter'] text-sm font-medium hover:text-indigo-500" href="#">
+<span class="material-symbols-outlined">campaign</span>
+                    Potencia con Ads
+                </a>
+</nav>
+<div class="mt-auto flex flex-col gap-1 pt-4 border-t border-slate-200/50">
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 font-['Inter'] text-sm font-medium hover:text-indigo-500" href="#">
+<span class="material-symbols-outlined">settings</span>
+                    Settings
+                </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 font-['Inter'] text-sm font-medium hover:text-indigo-500" href="#">
+<span class="material-symbols-outlined">contact_support</span>
+                    Support
+                </a>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-64 flex-1 p-8 max-w-5xl mx-auto">
+<!-- Onboarding Header -->
+<div class="mb-12">
+<h1 class="text-4xl font-extrabold tracking-tight text-on-background mb-3">Onboarding Inteligente</h1>
+<p class="text-on-surface-variant text-lg max-w-2xl">Configura tu ecosistema en pocos pasos. Nuestra IA usará estos datos para curar una estrategia editorial única para tu marca.</p>
+</div>
+<!-- Stepper -->
+<div class="flex items-center justify-between mb-12 px-4">
+<div class="flex items-center gap-4 relative">
+<div class="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold shadow-lg shadow-primary/20 relative z-10">1</div>
+<span class="font-bold text-on-background">Identidad</span>
+<div class="absolute h-[2px] bg-primary w-24 left-10 top-5 -z-0"></div>
+</div>
+<div class="flex items-center gap-4 relative">
+<div class="w-10 h-10 rounded-full bg-surface-container-high text-on-surface-variant flex items-center justify-center font-bold relative z-10">2</div>
+<span class="font-medium text-on-surface-variant">Conectividad</span>
+<div class="absolute h-[2px] bg-surface-container-high w-24 left-10 top-5 -z-0"></div>
+</div>
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-surface-container-high text-on-surface-variant flex items-center justify-center font-bold">3</div>
+<span class="font-medium text-on-surface-variant">Activos &amp; Meta</span>
+</div>
+</div>
+<!-- Section 1: Identity (Bento Style) -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-6 mb-12">
+<div class="md:col-span-7 bg-surface-container-lowest p-8 rounded-xl shadow-sm">
+<div class="flex items-center gap-3 mb-6">
+<span class="material-symbols-outlined text-primary">badge</span>
+<h2 class="text-xl font-bold">Identidad de Marca</h2>
+</div>
+<div class="space-y-6">
+<div>
+<label class="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-2">Nombre del Negocio</label>
+<input class="w-full bg-surface-container-lowest border-0 ring-1 ring-outline-variant/30 rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary-container/40 outline-none transition-all" placeholder="Ej: Velas Áurea" type="text"/>
+</div>
+<div>
+<label class="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-2">Descripción Estratégica</label>
+<div class="relative">
+<textarea class="w-full bg-surface-container-lowest border-0 ring-1 ring-outline-variant/30 rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary-container/40 outline-none transition-all resize-none" placeholder="Cuéntanos la esencia de tu marca, a quién ayudas y qué te diferencia..." rows="4"></textarea>
+<div class="absolute bottom-3 right-3 text-[10px] font-medium text-slate-400">0 / 250</div>
+</div>
+</div>
+</div>
+</div>
+<div class="md:col-span-5 bg-surface-container-low p-8 rounded-xl flex flex-col">
+<div class="flex items-center gap-3 mb-6">
+<span class="material-symbols-outlined text-primary">category</span>
+<h2 class="text-xl font-bold">Sector</h2>
+</div>
+<div class="flex flex-wrap gap-3">
+<button class="px-5 py-3 rounded-xl bg-white text-on-background font-medium shadow-sm hover:shadow-md transition-all flex items-center gap-2 border-2 border-primary">
+<span class="material-symbols-outlined text-primary text-sm" style="font-variation-settings: 'FILL' 1;">restaurant</span>
+                            Gastronomía
+                        </button>
+<button class="px-5 py-3 rounded-xl bg-white/50 text-on-surface-variant font-medium hover:bg-white transition-all flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">devices</span>
+                            Tecnología
+                        </button>
+<button class="px-5 py-3 rounded-xl bg-white/50 text-on-surface-variant font-medium hover:bg-white transition-all flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">apparel</span>
+                            Moda
+                        </button>
+<button class="px-5 py-3 rounded-xl bg-white/50 text-on-surface-variant font-medium hover:bg-white transition-all flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">home_repair_service</span>
+                            Servicios
+                        </button>
+<button class="px-5 py-3 rounded-xl bg-white/50 text-on-surface-variant font-medium hover:bg-white transition-all flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">auto_stories</span>
+                            Educación
+                        </button>
+<button class="px-5 py-3 rounded-xl bg-white/50 text-on-surface-variant font-medium hover:bg-white transition-all flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">add</span>
+                            Otro
+                        </button>
+</div>
+<div class="mt-auto pt-6">
+<p class="text-xs text-on-surface-variant italic">Tip: El sector ayuda a la IA a sugerir paletas de colores y tono de voz adecuados.</p>
+</div>
+</div>
+</div>
+<!-- Section 2: Connectivity -->
+<div class="bg-surface-container-lowest rounded-2xl overflow-hidden shadow-sm mb-8">
+<div class="p-8">
+<div class="flex items-center justify-between mb-8">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">hub</span>
+<h2 class="text-xl font-bold">Conectividad &amp; Datos</h2>
+</div>
+<span class="px-3 py-1 bg-tertiary-container text-on-tertiary-container text-xs font-bold rounded-full uppercase tracking-widest">Recomendado</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<!-- Store Connectors -->
+<div class="space-y-4">
+<button class="w-full flex items-center justify-between px-6 py-4 bg-[#004b91] text-white rounded-xl hover:opacity-90 transition-all group">
+<div class="flex items-center gap-4">
+<div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-xl">shopping_bag</span>
+</div>
+<span class="font-semibold">Tienda Nube</span>
+</div>
+<span class="material-symbols-outlined opacity-0 group-hover:opacity-100 transition-opacity">chevron_right</span>
+</button>
+<button class="w-full flex items-center justify-between px-6 py-4 bg-[#95bf47] text-white rounded-xl hover:opacity-90 transition-all group">
+<div class="flex items-center gap-4">
+<div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-xl">storefront</span>
+</div>
+<span class="font-semibold">Shopify</span>
+</div>
+<span class="material-symbols-outlined opacity-0 group-hover:opacity-100 transition-opacity">chevron_right</span>
+</button>
+</div>
+<!-- Excel Upload -->
+<div class="md:col-span-2 relative group">
+<div class="h-full border-2 border-dashed border-outline-variant/40 rounded-2xl flex flex-col items-center justify-center p-8 hover:border-primary-container hover:bg-primary-container/5 transition-all cursor-pointer">
+<div class="w-12 h-12 bg-surface-container-high rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-slate-500 group-hover:text-primary">upload_file</span>
+</div>
+<p class="font-bold text-on-background mb-1">Cargar inventario en Excel</p>
+<p class="text-sm text-on-surface-variant text-center">Si no tienes tienda online, arrastra tu lista de productos aquí para analizarlos.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Section 3 & 4: Availability & Assets (Asymmetric) -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-6 mb-12">
+<!-- Availability Slider -->
+<div class="md:col-span-4 bg-primary text-on-primary p-8 rounded-2xl flex flex-col justify-between overflow-hidden relative">
+<div class="relative z-10">
+<h3 class="text-xl font-bold mb-6">Disponibilidad</h3>
+<p class="text-sm opacity-80 mb-8 leading-relaxed">¿Cuántos días a la semana podés dedicarle al marketing?</p>
+<div class="space-y-6">
+<input class="w-full h-1 bg-white/30 rounded-lg appearance-none cursor-pointer" max="7" min="1" type="range" value="3"/>
+<div class="flex justify-between items-end">
+<div class="text-center">
+<span class="block text-3xl font-black">3</span>
+<span class="text-[10px] uppercase font-bold tracking-widest opacity-60">Días</span>
+</div>
+<div class="text-right">
+<span class="px-3 py-1 bg-white/20 rounded-full text-[10px] font-bold uppercase tracking-wider">Plan Moderado</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Decorative Circle -->
+<div class="absolute -bottom-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
+</div>
+<!-- Asset Gallery -->
+<div class="md:col-span-8 bg-surface-container-lowest p-8 rounded-2xl shadow-sm border border-white/40">
+<div class="flex items-center justify-between mb-6">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">image</span>
+<h2 class="text-xl font-bold">Galería de Activos</h2>
+</div>
+<div class="flex gap-2">
+<button class="px-4 py-2 bg-surface-container-low text-on-background text-sm font-semibold rounded-lg hover:bg-surface-container-high transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">auto_fix</span>
+                                Generar con IA
+                            </button>
+<button class="px-4 py-2 bg-surface-container-low text-on-background text-sm font-semibold rounded-lg hover:bg-surface-container-high transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">photo_library</span>
+                                Stock
+                            </button>
+</div>
+</div>
+<div class="grid grid-cols-4 gap-4">
+<div class="aspect-square bg-surface-container rounded-xl flex items-center justify-center border-2 border-dashed border-outline-variant/30 group hover:border-primary cursor-pointer transition-colors">
+<span class="material-symbols-outlined text-slate-400 group-hover:text-primary transition-colors">add_a_photo</span>
+</div>
+<div class="aspect-square rounded-xl overflow-hidden group relative">
+<img class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" data-alt="close-up of a premium ceramic candle on a minimalist white surface with soft morning light shadows" src="https://lh3.googleusercontent.com/aida-public/AB6AXuArI73gA8cMjcUSSYBfqi75jtNBvE_7U5W7O7okEuOA7otkD9yxbxSO2H7HoX5UM5k07_N8rLHGXvIS2js5F-rpGNdWVQuoTN3shYYF_rTXnUYOGFoOJFwQd1uWEWs-bQsbL50BHk_TbKfbs4rUqmyaVatAmAv1J1zvAt1MTxHcmNseBDWKr325DN3M7W23NWMdFnIWMKAVR_sMVd_bliiq0MXsBxnY-QLI4CUZ7lDJKKnqRUswVvkgvzc45ERyOlnjP_s_lM7G6xua"/>
+<div class="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+<span class="material-symbols-outlined text-white">check_circle</span>
+</div>
+</div>
+<div class="aspect-square rounded-xl overflow-hidden group relative">
+<img class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" data-alt="stack of neatly folded linen textile in neutral beige tones with soft tactile texture and natural lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDU8XF3zRehXD6Ojd1o-zElz-VrwKEvWUucymkEQGoqzxNQ7rbKeGJCpgs3rweYaBY-d8YERctCaePn57RlYHQJEzpnh4kNAFcJ0ZVBelhN_vAl-9GIPa71fNw5kLKR_oMDg34ziDnrXXNGChy6mKN-LW-JIp3PRZlOI1yyghakwTc6f_iyD7ZxohzFbeh8sGsS9wtVWhuPfMk7f39UlPVH5uGHo3ERK-daVtkRl0PKt91Rbd3ulzkkhhtuxckS5GRo1ysytWX_p1Rs"/>
+<div class="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+<span class="material-symbols-outlined text-white">check_circle</span>
+</div>
+</div>
+<div class="aspect-square rounded-xl overflow-hidden group relative">
+<img class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" data-alt="interior shot of a bright modern workshop with wooden tables and artisan tools in the background soft focus" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCSZnoz2oqx3gc7K-z9V8xeqNvVC28kQ_idt-anzjrzhPA0QZ9Y1QeX4MadDZAARWcbh2QFgIWcbqK3WkdsOiUdaQICEWTsZgh05muP2jjSxv85bas-vhuEo2lSIo8a6Soym_4YxEbWBrYJEILtH4fOMcCR2QVw_WDLGG5UnO2eDBaIwgL6rinWmUmx6aApPOkVjzn8Ex5BW4KuIncri_jfpZ4IZkMmrzjGqyrq6Z8k8VG9xQRi4igsBK7eJmkDaLu78XKp9k0mcctA"/>
+<div class="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+<span class="material-symbols-outlined text-white">check_circle</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer Navigation -->
+<div class="flex items-center justify-between pt-8 border-t border-surface-container-high">
+<button class="px-6 py-3 text-on-surface-variant font-bold hover:text-on-background transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">arrow_back</span>
+                    Cancelar
+                </button>
+<div class="flex gap-4">
+<button class="px-8 py-3 bg-surface-container-high text-on-surface font-bold rounded-xl active:scale-95 transition-all">
+                        Guardar Borrador
+                    </button>
+<button class="px-8 py-3 bg-gradient-to-r from-primary to-primary-container text-white font-bold rounded-xl shadow-lg shadow-primary/20 active:scale-95 transition-all flex items-center gap-2">
+                        Continuar
+                        <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</div>
+</div>
+</main>
+</div>
+</body></html>
