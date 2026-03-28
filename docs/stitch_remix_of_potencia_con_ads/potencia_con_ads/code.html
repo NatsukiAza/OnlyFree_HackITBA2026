@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary-fixed-dim": "#8885ff",
+              "on-secondary-fixed": "#004840",
+              "on-error-container": "#510017",
+              "tertiary-dim": "#95233b",
+              "on-secondary-container": "#005c52",
+              "on-surface-variant": "#595c5e",
+              "secondary-container": "#62fae3",
+              "tertiary": "#a53046",
+              "surface-container-highest": "#d9dde0",
+              "on-primary-container": "#14007e",
+              "secondary-fixed": "#62fae3",
+              "secondary-dim": "#005a50",
+              "tertiary-fixed-dim": "#ff788b",
+              "background": "#f5f7f9",
+              "surface-dim": "#d0d5d8",
+              "inverse-surface": "#0b0f10",
+              "primary": "#4a40e0",
+              "surface-container-low": "#eef1f3",
+              "surface": "#f5f7f9",
+              "error": "#b41340",
+              "primary-dim": "#3d30d4",
+              "tertiary-container": "#ff909d",
+              "error-dim": "#a70138",
+              "on-tertiary-fixed-variant": "#760726",
+              "inverse-primary": "#8582ff",
+              "on-tertiary": "#ffefef",
+              "on-primary": "#f4f1ff",
+              "error-container": "#f74b6d",
+              "on-secondary-fixed-variant": "#00675c",
+              "on-error": "#ffefef",
+              "secondary-fixed-dim": "#50ebd5",
+              "inverse-on-surface": "#9a9d9f",
+              "surface-bright": "#f5f7f9",
+              "surface-tint": "#4a40e0",
+              "on-primary-fixed": "#000000",
+              "on-tertiary-fixed": "#39000d",
+              "on-background": "#2c2f31",
+              "surface-container-high": "#dfe3e6",
+              "on-secondary": "#c1fff2",
+              "surface-variant": "#d9dde0",
+              "primary-fixed": "#9795ff",
+              "surface-container-lowest": "#ffffff",
+              "surface-container": "#e5e9eb",
+              "outline-variant": "#abadaf",
+              "outline": "#747779",
+              "primary-container": "#9795ff",
+              "on-primary-fixed-variant": "#1a0099",
+              "tertiary-fixed": "#ff909d",
+              "on-surface": "#2c2f31",
+              "on-tertiary-container": "#67001f",
+              "secondary": "#00675c"
+            },
+            fontFamily: {
+              "headline": ["Plus Jakarta Sans"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3 { font-family: 'Plus Jakarta Sans', sans-serif; }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen">
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-0 bottom-0 flex flex-col p-4 gap-2 bg-[#f5f7f9] dark:bg-slate-950 h-screen w-64 border-r-0 z-50">
+<div class="flex items-center gap-3 px-2 mb-8">
+<div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary-container flex items-center justify-center text-white shadow-sm">
+<span class="material-symbols-outlined">campaign</span>
+</div>
+<div>
+<h2 class="text-lg font-black text-slate-800 dark:text-slate-100 leading-tight">Marketing Hub</h2>
+<p class="text-[10px] font-medium text-on-surface-variant uppercase tracking-wider">Small Biz Growth</p>
+</div>
+</div>
+<nav class="flex-1 flex flex-col gap-1">
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:translate-x-1 transition-transform font-['Inter'] text-sm font-medium" href="#">
+<span class="material-symbols-outlined">storefront</span>
+<span>Mi Negocio</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:translate-x-1 transition-transform font-['Inter'] text-sm font-medium" href="#">
+<span class="material-symbols-outlined">calendar_today</span>
+<span>Estrategia</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:translate-x-1 transition-transform font-['Inter'] text-sm font-medium" href="#">
+<span class="material-symbols-outlined">auto_awesome</span>
+<span>Contenido IA</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 rounded-xl shadow-sm font-['Inter'] text-sm font-medium" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">campaign</span>
+<span>Potencia con Ads</span>
+</a>
+</nav>
+<div class="mt-auto flex flex-col gap-1 pt-4 border-t border-surface-container">
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:translate-x-1 transition-transform font-['Inter'] text-sm font-medium" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span>Settings</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:translate-x-1 transition-transform font-['Inter'] text-sm font-medium" href="#">
+<span class="material-symbols-outlined">contact_support</span>
+<span>Support</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="pl-64 min-h-screen">
+<!-- TopAppBar -->
+<header class="fixed top-0 right-0 left-64 z-40 bg-white/80 backdrop-blur-xl h-16 shadow-sm shadow-slate-200/50">
+<div class="flex justify-between items-center h-full px-8 max-w-screen-2xl mx-auto">
+<h1 class="text-xl font-bold bg-gradient-to-r from-indigo-600 to-indigo-400 bg-clip-text text-transparent font-['Plus_Jakarta_Sans'] tracking-tight">Editorial Studio</h1>
+<div class="flex items-center gap-6">
+<button class="text-slate-500 hover:bg-slate-50 p-2 rounded-full transition-all active:scale-95">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="text-slate-500 hover:bg-slate-50 p-2 rounded-full transition-all active:scale-95">
+<span class="material-symbols-outlined">help_outline</span>
+</button>
+<div class="w-8 h-8 rounded-full overflow-hidden border-2 border-primary-container/20">
+<img alt="User profile avatar" class="w-full h-full object-cover" data-alt="Close up portrait of a friendly professional woman smiling in a bright modern office setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA25a1fAuKj6GVK9DDWJW55FIjcS1w6YhTwrlzhfxZhtpp-fj5giqCQKrGkS4Gu2OeTZKfVZzgvARg73ECHqTwHgE1xlGfxpHvv8EZDmHVn63ZhzkmgmsbjbYBByS8B-Y29jGrPKgSA9-kSY5QHWMI7QE9tZi_YlCvMiOR7l6OO5i620MRgzH19LUnoY_UY1rFvo6QQDK_8fCWd2b5SSk2qmlsI3utzyNvF6uNrlS58f_jt4TS0U7OLQSF8jsGV-vjwqxGu6wGqt4yc"/>
+</div>
+</div>
+</div>
+<div class="bg-slate-100/50 h-[1px] w-full absolute bottom-0"></div>
+</header>
+<div class="pt-24 px-8 pb-12 max-w-[1600px] mx-auto">
+<div class="flex flex-col lg:flex-row gap-8">
+<!-- Left: Chatbot Interface -->
+<section class="flex-1 flex flex-col gap-6">
+<div class="bg-surface-container-low rounded-[2rem] p-8 min-h-[600px] flex flex-col">
+<div class="flex items-center gap-4 mb-8">
+<div class="w-12 h-12 rounded-2xl bg-primary flex items-center justify-center text-white">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">smart_toy</span>
+</div>
+<div>
+<h3 class="text-xl font-bold text-on-background">Tu Asistente de Ads</h3>
+<p class="text-sm text-on-surface-variant font-medium">Guía experta sin complicaciones</p>
+</div>
+</div>
+<div class="flex-1 space-y-6 overflow-y-auto mb-8 pr-2">
+<!-- Message from AI -->
+<div class="flex gap-4 max-w-[85%]">
+<div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-primary text-sm">auto_awesome</span>
+</div>
+<div class="bg-surface-container-lowest p-5 rounded-2xl rounded-tl-none shadow-sm">
+<p class="text-on-background leading-relaxed">¡Hola! Soy tu guía para hacer crecer tu negocio. He analizado tus publicaciones recientes y veo que tus fotos de productos de verano están gustando mucho. ¿Te gustaría que las mostremos a más personas con una campaña sencilla?</p>
+</div>
+</div>
+<!-- Starter Bubbles -->
+<div class="flex flex-wrap gap-3 mt-4">
+<button class="bg-surface-container-highest/50 hover:bg-surface-container-highest text-on-surface-variant px-5 py-3 rounded-full text-sm font-medium transition-all active:scale-95">
+                                    ¿Cómo configuro mi primera campaña?
+                                </button>
+<button class="bg-surface-container-highest/50 hover:bg-surface-container-highest text-on-surface-variant px-5 py-3 rounded-full text-sm font-medium transition-all active:scale-95">
+                                    ¿Cuánto presupuesto necesito?
+                                </button>
+<button class="bg-surface-container-highest/50 hover:bg-surface-container-highest text-on-surface-variant px-5 py-3 rounded-full text-sm font-medium transition-all active:scale-95">
+                                    ¿A quién debería mostrarle mis anuncios?
+                                </button>
+</div>
+</div>
+<!-- Chat Input -->
+<div class="relative group">
+<input class="w-full bg-surface-container-lowest border-none rounded-2xl py-5 px-6 pr-14 shadow-sm text-on-background placeholder:text-outline focus:ring-2 focus:ring-primary-container/40 transition-all" placeholder="Escribe tu duda aquí..." type="text"/>
+<button class="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-primary text-white rounded-xl flex items-center justify-center hover:scale-105 active:scale-95 transition-all">
+<span class="material-symbols-outlined">send</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Right: Panel de Métricas Simples & Glosario -->
+<aside class="w-full lg:w-[420px] flex flex-col gap-6">
+<!-- Dashboard Simple -->
+<div class="bg-surface-container-lowest rounded-[2rem] p-8 shadow-sm">
+<div class="flex justify-between items-center mb-6">
+<h3 class="text-lg font-bold text-on-background">Tu Rendimiento</h3>
+<span class="bg-secondary-container text-on-secondary-container px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest">En Vivo</span>
+</div>
+<div class="grid grid-cols-1 gap-4">
+<!-- Metric Card 1 -->
+<div class="p-6 bg-surface-container-low rounded-2xl flex flex-col gap-1 relative overflow-hidden group">
+<div class="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-full -mr-8 -mt-8 transition-transform group-hover:scale-110"></div>
+<span class="text-on-surface-variant text-xs font-semibold uppercase tracking-wider">Inversión Actual</span>
+<div class="flex items-baseline gap-2">
+<span class="text-3xl font-extrabold text-on-background">$45.00</span>
+<span class="text-xs text-secondary font-bold flex items-center gap-0.5">
+<span class="material-symbols-outlined text-xs">trending_up</span>
+                                        Estable
+                                    </span>
+</div>
+<p class="text-[11px] text-on-surface-variant mt-2 italic">"Lo que has invertido hoy"</p>
+</div>
+<!-- Metric Card 2 -->
+<div class="p-6 bg-surface-container-low rounded-2xl flex flex-col gap-1 relative overflow-hidden group">
+<div class="absolute top-0 right-0 w-24 h-24 bg-tertiary-container/10 rounded-full -mr-8 -mt-8 transition-transform group-hover:scale-110"></div>
+<span class="text-on-surface-variant text-xs font-semibold uppercase tracking-wider">Interés Generado</span>
+<div class="flex items-baseline gap-2">
+<span class="text-3xl font-extrabold text-on-background">1,240</span>
+<span class="text-xs text-secondary font-bold flex items-center gap-0.5">
+<span class="material-symbols-outlined text-xs">trending_up</span>
+                                        +12%
+                                    </span>
+</div>
+<p class="text-[11px] text-on-surface-variant mt-2 italic">"Personas que tocaron tu anuncio"</p>
+</div>
+<!-- Metric Card 3 -->
+<div class="p-6 bg-primary text-white rounded-2xl flex flex-col gap-1 shadow-lg shadow-primary/20 relative overflow-hidden group">
+<div class="absolute bottom-0 right-0 w-32 h-32 bg-white/10 rounded-full -mb-16 -mr-16"></div>
+<span class="text-primary-fixed text-xs font-semibold uppercase tracking-wider">Nuevos Clientes</span>
+<div class="flex items-baseline gap-2">
+<span class="text-3xl font-extrabold">28</span>
+<span class="text-xs font-bold bg-white/20 px-2 py-0.5 rounded-full">Meta: 50</span>
+</div>
+<p class="text-[11px] text-primary-fixed mt-2 italic">"Ventas realizadas gracias al anuncio"</p>
+</div>
+</div>
+</div>
+<!-- Glosario Humano -->
+<div class="bg-surface-container-low/50 rounded-[2rem] p-8">
+<div class="flex items-center gap-3 mb-6">
+<span class="material-symbols-outlined text-tertiary">menu_book</span>
+<h3 class="text-lg font-bold text-on-background">Glosario Humano</h3>
+</div>
+<ul class="space-y-5">
+<li class="group">
+<div class="flex items-center gap-2 mb-1">
+<span class="text-xs font-bold text-on-background px-2 py-0.5 bg-surface-container-high rounded">CTR</span>
+<span class="material-symbols-outlined text-outline text-sm">arrow_forward</span>
+<span class="text-sm font-bold text-primary">Efectividad de clics</span>
+</div>
+<p class="text-xs text-on-surface-variant leading-relaxed">Qué tan llamativo es tu anuncio para que la gente quiera entrar.</p>
+</li>
+<li class="group">
+<div class="flex items-center gap-2 mb-1">
+<span class="text-xs font-bold text-on-background px-2 py-0.5 bg-surface-container-high rounded">CPC</span>
+<span class="material-symbols-outlined text-outline text-sm">arrow_forward</span>
+<span class="text-sm font-bold text-primary">Costo por curiosidad</span>
+</div>
+<p class="text-xs text-on-surface-variant leading-relaxed">Cuánto te cuesta que una persona entre a ver tu tienda.</p>
+</li>
+<li class="group">
+<div class="flex items-center gap-2 mb-1">
+<span class="text-xs font-bold text-on-background px-2 py-0.5 bg-surface-container-high rounded">Reach</span>
+<span class="material-symbols-outlined text-outline text-sm">arrow_forward</span>
+<span class="text-sm font-bold text-primary">Alcance de personas</span>
+</div>
+<p class="text-xs text-on-surface-variant leading-relaxed">El número total de personas distintas que vieron tu anuncio.</p>
+</li>
+</ul>
+</div>
+<!-- Marketing Insight Chip -->
+<div class="bg-tertiary-container p-6 rounded-[2rem] flex items-start gap-4 transition-transform hover:scale-[1.02]">
+<div class="w-10 h-10 rounded-full bg-on-tertiary-container/10 flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-on-tertiary-container">tips_and_updates</span>
+</div>
+<div>
+<p class="text-[11px] font-bold text-on-tertiary-container uppercase tracking-widest mb-1">Tip del Día</p>
+<p class="text-sm font-medium text-on-tertiary-container leading-tight">Las fotos con luz natural suelen vender un 20% más en Instagram. ¡Inténtalo!</p>
+</div>
+</div>
+</aside>
+</div>
+</div>
+</main>
+<!-- FAB Suppression: This screen represents a focused guidance task, so we suppress the main global FAB to avoid distraction from the AI chat input. -->
+</body></html>

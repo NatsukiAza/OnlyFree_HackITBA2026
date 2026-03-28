@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Editorial Studio - Contenido IA</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Plus+Jakarta+Sans:wght@600;700;800&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary-fixed-dim": "#8885ff",
+              "on-secondary-fixed": "#004840",
+              "on-error-container": "#510017",
+              "tertiary-dim": "#95233b",
+              "on-secondary-container": "#005c52",
+              "on-surface-variant": "#595c5e",
+              "secondary-container": "#62fae3",
+              "tertiary": "#a53046",
+              "surface-container-highest": "#d9dde0",
+              "on-primary-container": "#14007e",
+              "secondary-fixed": "#62fae3",
+              "secondary-dim": "#005a50",
+              "tertiary-fixed-dim": "#ff788b",
+              "background": "#f5f7f9",
+              "surface-dim": "#d0d5d8",
+              "inverse-surface": "#0b0f10",
+              "primary": "#4a40e0",
+              "surface-container-low": "#eef1f3",
+              "surface": "#f5f7f9",
+              "error": "#b41340",
+              "primary-dim": "#3d30d4",
+              "tertiary-container": "#ff909d",
+              "error-dim": "#a70138",
+              "on-tertiary-fixed-variant": "#760726",
+              "inverse-primary": "#8582ff",
+              "on-tertiary": "#ffefef",
+              "on-primary": "#f4f1ff",
+              "error-container": "#f74b6d",
+              "on-secondary-fixed-variant": "#00675c",
+              "on-error": "#ffefef",
+              "secondary-fixed-dim": "#50ebd5",
+              "inverse-on-surface": "#9a9d9f",
+              "surface-bright": "#f5f7f9",
+              "surface-tint": "#4a40e0",
+              "on-primary-fixed": "#000000",
+              "on-tertiary-fixed": "#39000d",
+              "on-background": "#2c2f31",
+              "surface-container-high": "#dfe3e6",
+              "on-secondary": "#c1fff2",
+              "surface-variant": "#d9dde0",
+              "primary-fixed": "#9795ff",
+              "surface-container-lowest": "#ffffff",
+              "surface-container": "#e5e9eb",
+              "outline-variant": "#abadaf",
+              "outline": "#747779",
+              "primary-container": "#9795ff",
+              "on-primary-fixed-variant": "#1a0099",
+              "tertiary-fixed": "#ff909d",
+              "on-surface": "#2c2f31",
+              "on-tertiary-container": "#67001f",
+              "secondary": "#00675c"
+            },
+            fontFamily: {
+              "headline": ["Plus Jakarta Sans"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .masonry-grid {
+            column-count: 1;
+            column-gap: 1.5rem;
+        }
+        @media (min-width: 768px) { .masonry-grid { column-count: 2; } }
+        @media (min-width: 1024px) { .masonry-grid { column-count: 3; } }
+        @media (min-width: 1536px) { .masonry-grid { column-count: 4; } }
+        .masonry-item {
+            break-inside: avoid;
+            margin-bottom: 1.5rem;
+        }
+        .skeleton-shimmer {
+            background: linear-gradient(90deg, #eef1f3 25%, #dfe3e6 50%, #eef1f3 75%);
+            background-size: 200% 100%;
+            animation: shimmer 2s infinite linear;
+        }
+        @keyframes shimmer {
+            from { background-position: 200% 0; }
+            to { background-position: -200% 0; }
+        }
+    </style>
+</head>
+<body class="bg-background font-body text-on-background">
+<!-- TopAppBar Shell -->
+<header class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl fixed top-0 w-full z-40">
+<div class="flex justify-between items-center h-16 px-6 w-full max-w-screen-2xl mx-auto relative">
+<div class="flex items-center gap-4">
+<span class="text-xl font-bold bg-gradient-to-r from-indigo-600 to-indigo-400 bg-clip-text text-transparent">Editorial Studio</span>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all duration-300 rounded-full active:scale-95">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="p-2 text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all duration-300 rounded-full active:scale-95">
+<span class="material-symbols-outlined" data-icon="help_outline">help_outline</span>
+</button>
+<div class="w-8 h-8 rounded-full bg-surface-container-high overflow-hidden border border-white/20">
+<img alt="User profile avatar" data-alt="Close up portrait of a professional woman with a clean, minimalist aesthetic and soft natural lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDm6FU4-CiSredDnlJmUsxUxh91xDEUiIC4-XNpPZdI_agEJ4c_W5PhWuw11p3Jx0QlKQNPVw2moHPqBsqyoFQt7zoHah8IDk2En2cSTBVUALTXJTuA8r0d-u-hEwa7fqsd12IDLYwPZTujV73jTSpfCZe1J0fCux_GFGwSzltvzuc0GAtThLRTvHAiUvrDdiYNHxt2fQGXAt4vXQSUTJ4yA2GTAqvZWfxPcAgBqwZMcbBRkYnioqS7cYiXRdkPoXjigIxGn916P8Zw"/>
+</div>
+</div>
+<div class="bg-slate-100/50 dark:bg-slate-800/50 h-[1px] w-full absolute bottom-0 left-0"></div>
+</div>
+</header>
+<!-- SideNavBar Shell -->
+<nav class="fixed left-0 top-0 bottom-0 hidden md:flex flex-col p-4 gap-2 h-screen w-64 z-50 bg-[#f5f7f9] dark:bg-slate-950">
+<div class="mb-8 px-4 mt-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-on-primary shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined" data-icon="auto_awesome" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+</div>
+<div>
+<h2 class="text-lg font-black text-slate-800 dark:text-slate-100 leading-tight">Marketing Hub</h2>
+<p class="text-[10px] uppercase tracking-wider font-bold text-slate-400">Small Biz Growth</p>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-1 flex-1">
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:translate-x-1 transition-transform group" href="#">
+<span class="material-symbols-outlined transition-all group-hover:scale-110" data-icon="storefront">storefront</span>
+<span class="font-['Inter'] text-sm font-medium">Mi Negocio</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:translate-x-1 transition-transform group" href="#">
+<span class="material-symbols-outlined transition-all group-hover:scale-110" data-icon="calendar_today">calendar_today</span>
+<span class="font-['Inter'] text-sm font-medium">Estrategia</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 rounded-xl shadow-sm group" href="#">
+<span class="material-symbols-outlined transition-all group-hover:scale-110" data-icon="auto_awesome" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+<span class="font-['Inter'] text-sm font-medium">Contenido IA</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:translate-x-1 transition-transform group" href="#">
+<span class="material-symbols-outlined transition-all group-hover:scale-110" data-icon="campaign">campaign</span>
+<span class="font-['Inter'] text-sm font-medium">Potencia con Ads</span>
+</a>
+</div>
+<div class="mt-auto flex flex-col gap-1 pt-4 border-t border-slate-200/50">
+<button class="w-full mb-4 bg-gradient-to-r from-primary to-primary-container text-on-primary py-3 rounded-xl font-bold text-sm shadow-md hover:shadow-lg transition-all active:scale-95">
+                Create New Post
+            </button>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-indigo-500 transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-['Inter'] text-sm font-medium">Settings</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-indigo-500 transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="contact_support">contact_support</span>
+<span class="font-['Inter'] text-sm font-medium">Support</span>
+</a>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="md:ml-64 pt-24 px-6 pb-12 min-h-screen">
+<div class="max-w-screen-2xl mx-auto">
+<!-- Page Header -->
+<header class="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
+<div>
+<div class="flex items-center gap-2 mb-2">
+<span class="px-2 py-0.5 bg-tertiary-container text-on-tertiary-container text-[10px] font-bold rounded-md tracking-wider">PREMIUM TOOL</span>
+<h4 class="text-primary font-bold text-sm">Contenido IA</h4>
+</div>
+<h1 class="text-4xl md:text-5xl font-headline font-extrabold text-on-background tracking-tight">Galería Creativa</h1>
+<p class="text-on-surface-variant mt-2 max-w-xl">Tus piezas visuales generadas por IA listas para ser curadas, editadas y publicadas en tus canales.</p>
+</div>
+<div class="flex items-center gap-3">
+<div class="bg-surface-container-low p-1 rounded-xl flex">
+<button class="px-4 py-2 bg-white rounded-lg shadow-sm text-sm font-bold text-primary flex items-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="grid_view">grid_view</span> Todos
+                        </button>
+<button class="px-4 py-2 text-on-surface-variant text-sm font-medium hover:text-primary transition-colors">Reels</button>
+<button class="px-4 py-2 text-on-surface-variant text-sm font-medium hover:text-primary transition-colors">Posts</button>
+</div>
+</div>
+</header>
+<!-- Masonry Grid -->
+<div class="masonry-grid">
+<!-- Card 1: Reel Preview -->
+<div class="masonry-item group relative overflow-hidden rounded-xl bg-surface-container-lowest shadow-sm hover:shadow-xl transition-all duration-500">
+<div class="relative aspect-[9/16] overflow-hidden">
+<img alt="Modern workspace" class="w-full h-full object-cover" data-alt="Cinematic vertical video frame showing a high-end minimalist creative workspace with soft morning light and floating dust motes" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBNpIbdrbqAjDOhMElGdM-d0UokCiOOpHq6kDGBSqfGgryK4Hav3_Ptdr2c4gakABCIp9GtajivoNBWwxyCmctcE1TFU5LUzIJA73eQnBkvDQSGpc6QTBX6FwFN-dmo2yNNdkKmrsRGJnFMIEOpqMd-maws9cOqsLG3mOaBTbYtOU5R-vGex2_0dK3EvxGdMx2zvufG5RvS66Vp8qfoePb03m8pgEfWy0Go7W0GShlKSoTJZzR0y5-w69YZn69GYQ4gPSOJikITrT-4"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+<!-- Overlay Labels -->
+<div class="absolute top-4 left-4 flex items-center gap-2">
+<span class="bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-bold text-on-background">Día 12</span>
+<span class="bg-indigo-600 px-3 py-1 rounded-full text-[10px] font-bold text-white flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]" data-icon="play_circle">play_circle</span> Reel
+                            </span>
+</div>
+<!-- Video UI Mockup -->
+<div class="absolute bottom-4 left-4 right-4 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity translate-y-2 group-hover:translate-y-0 duration-300">
+<div class="flex gap-2 w-full">
+<button class="flex-1 bg-white/90 backdrop-blur-md text-on-background py-2 rounded-lg text-xs font-bold hover:bg-white transition-colors flex items-center justify-center gap-1">
+<span class="material-symbols-outlined text-sm" data-icon="download">download</span> Descargar
+                                </button>
+<button class="w-10 h-10 bg-white/20 backdrop-blur-md text-white rounded-lg flex items-center justify-center hover:bg-white/30 transition-colors">
+<span class="material-symbols-outlined" data-icon="edit">edit</span>
+</button>
+<button class="w-10 h-10 bg-white/20 backdrop-blur-md text-white rounded-lg flex items-center justify-center hover:bg-white/30 transition-colors">
+<span class="material-symbols-outlined" data-icon="refresh">refresh</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Card 2: Square Post -->
+<div class="masonry-item group relative overflow-hidden rounded-xl bg-surface-container-lowest shadow-sm hover:shadow-xl transition-all duration-500">
+<div class="relative aspect-square overflow-hidden">
+<img alt="Strategy brainstorming" class="w-full h-full object-cover" data-alt="Top down view of a clean marble desk with a modern tablet displaying data charts, a pen, and a cup of coffee" src="https://lh3.googleusercontent.com/aida-public/AB6AXuClfM3hkRsa7tXvsVHQpw6dHJl3Nghw7xotd51gFllCW-HZOtMDmSMiGDPijGKmu2ukzINtFRMOVthXrpdJKMH3fXuEAmxp0cePyA8tPifxQefVvib4mDbDBsJRvLmvPceBFhiPfsvzxddV9tnhzvLTZl1ceQcGr18BEdYAFG-yp_5q50GY2ytBbpXc1iDeMvEipRyuU5o5Jx8FDxlf3eYmwAGF1QH1To81E59OnR_M6SXge3v9MauHXNwxx9O47XJgHWLdPc1s5jwK"/>
+<div class="absolute top-4 left-4">
+<span class="bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-bold text-on-background">Día 08</span>
+</div>
+<div class="absolute inset-x-0 bottom-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300 bg-white/95 backdrop-blur-sm">
+<div class="flex items-center justify-between mb-2">
+<p class="text-xs font-bold text-on-background">Post: Estrategia Mensual</p>
+</div>
+<div class="flex gap-2">
+<button class="flex-1 bg-primary text-on-primary py-2 rounded-lg text-xs font-bold shadow-sm active:scale-95 transition-all">Editar</button>
+<button class="px-3 bg-surface-container-low text-on-surface-variant rounded-lg hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-sm" data-icon="refresh">refresh</span>
+</button>
+<button class="px-3 bg-surface-container-low text-on-surface-variant rounded-lg hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-sm" data-icon="download">download</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Card 3: Skeleton Loader -->
+<div class="masonry-item rounded-xl bg-surface-container-low p-1 overflow-hidden">
+<div class="relative aspect-[3/4] rounded-lg skeleton-shimmer flex flex-col items-center justify-center gap-4">
+<div class="w-12 h-12 bg-white/40 rounded-full flex items-center justify-center animate-pulse">
+<span class="material-symbols-outlined text-primary" data-icon="auto_awesome" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+</div>
+<div class="text-center">
+<p class="text-xs font-bold text-on-surface-variant">Generating magic...</p>
+<p class="text-[10px] text-outline mt-1">Día 15: Content Batch</p>
+</div>
+</div>
+</div>
+<!-- Card 4: Long Vertical Visual -->
+<div class="masonry-item group relative overflow-hidden rounded-xl bg-surface-container-lowest shadow-sm hover:shadow-xl transition-all duration-500">
+<div class="relative aspect-[4/5] overflow-hidden">
+<img alt="Editorial lifestyle" class="w-full h-full object-cover" data-alt="Atmospheric shot of a boutique bookstore interior with warm wooden shelves and artistic lighting, editorial photography style" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC0vgYSYwTwrPIEC4jdt3G60wKuP8mLCn8KzYmKkUzQjW1VJ0yfmuRvw09d1Nhxfi5kUhzbQYK78lhpE2DHeOTIS3AB5gmdsDsHcgHlMsPLybKwt6qLhP8y-rCQYpv7OV3CQFtvoTrxIE56BfEmLPAjvOPGTRWaJWcKysqLjhofc2e71D7WL3f6PY3aHY4nPw6TaHvy45r5_CFsWSlai3PEUSkwI454KuOfZ3JfVEBdBNFrGnhYbyPo50eSdUPcTpRtGS1IwcNYNrTM"/>
+<div class="absolute top-4 left-4">
+<span class="bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-bold text-on-background">Día 10</span>
+</div>
+<div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity">
+<div class="absolute top-4 right-4">
+<button class="w-8 h-8 bg-white/90 rounded-full flex items-center justify-center text-error hover:bg-white transition-colors">
+<span class="material-symbols-outlined text-sm" data-icon="favorite" style="font-variation-settings: 'FILL' 1;">favorite</span>
+</button>
+</div>
+</div>
+<div class="absolute bottom-4 inset-x-4 flex gap-2 translate-y-12 group-hover:translate-y-0 transition-transform duration-300">
+<button class="flex-1 bg-white text-on-background py-2 rounded-lg text-xs font-bold shadow-lg hover:bg-slate-50 transition-colors">Descargar</button>
+<button class="w-10 h-10 bg-indigo-600 text-white rounded-lg flex items-center justify-center hover:bg-indigo-700 shadow-lg transition-colors">
+<span class="material-symbols-outlined text-sm" data-icon="edit">edit</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Card 5: Story Size -->
+<div class="masonry-item group relative overflow-hidden rounded-xl bg-surface-container-lowest shadow-sm hover:shadow-xl transition-all duration-500">
+<div class="relative aspect-[9/16] overflow-hidden">
+<img alt="Tech Interaction" class="w-full h-full object-cover" data-alt="Macro close-up of a person's hands interacting with a glass-like digital interface, glowing blue tones and soft bokeh" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAdmG7ysf0d3KVZHvt4FesIlhg2r45OaS3KEFJap0OihbLYOCA-fUzoTSbKBUOcjKim4xkLzJS69D0u3fl8dcR1NAd9mRhsGunkw42CykCSvc6D6vqlr2SxRQLH5YVTLaUcWnMydft5_ixbmUfHPK4Rzsby4Ahpz2RbUnba3ssAODtuGNfc7Gq_LgZfNSgq8eWMrNAlagYv2nTKiIp14lRERI0UuLqg26PgQDejEswmb-O72fXipZCKn3W1nK8S1ufqcbnI9PlSiYy9"/>
+<div class="absolute top-4 left-4 flex items-center gap-2">
+<span class="bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-bold text-on-background">Día 14</span>
+<span class="bg-tertiary px-3 py-1 rounded-full text-[10px] font-bold text-white">Story</span>
+</div>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex flex-col justify-end p-6 translate-y-4 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-300">
+<h3 class="text-white font-bold mb-4">Interacción Digital</h3>
+<div class="grid grid-cols-2 gap-2">
+<button class="bg-white py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1">
+<span class="material-symbols-outlined text-sm" data-icon="download">download</span> Save
+                                </button>
+<button class="bg-white/20 backdrop-blur-md text-white py-2 rounded-lg text-xs font-bold hover:bg-white/30 transition-colors">Edit</button>
+<button class="col-span-2 bg-primary/80 backdrop-blur-md text-white py-2 rounded-lg text-xs font-bold hover:bg-primary transition-colors">Regenerar IA</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Card 6: Landscape Visual -->
+<div class="masonry-item group relative overflow-hidden rounded-xl bg-surface-container-lowest shadow-sm hover:shadow-xl transition-all duration-500">
+<div class="relative aspect-video overflow-hidden">
+<img alt="Modern office" class="w-full h-full object-cover" data-alt="Wide angle view of a sleek contemporary office space with floor to ceiling windows, city view, and plants" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDhCso1eRiOsJjIJ-MpH3nlLYSXt9KkFv1k-WVA6yK8Fvxu-j-APlRp4cGWSN0MuDFRLWy2uvsAirCsCbWAzYXpCoCVxQ69x4dFDRRwgJ6zyK62K7g5No3Bizz64g4ik-Ti28i_BDkZTl1I3Biw9jIu5HW-kg2WRoKzJ0eamqj5ydX5_RbCyGStqLJLg_-jLNDEui3EwgG3i-FYESy4OcByd6EftrjIZZu3HgZYB3ogqblViyu0YB8kqjsdwZpgdNnMQeeGbpeyubv0"/>
+<div class="absolute top-3 left-3">
+<span class="bg-white/90 backdrop-blur-md px-2 py-0.5 rounded-full text-[9px] font-bold text-on-background">Día 05</span>
+</div>
+<div class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
+<div class="flex gap-1">
+<button class="w-7 h-7 bg-white/90 rounded-md flex items-center justify-center text-on-surface hover:text-primary"><span class="material-symbols-outlined text-[16px]" data-icon="edit">edit</span></button>
+<button class="w-7 h-7 bg-white/90 rounded-md flex items-center justify-center text-on-surface hover:text-primary"><span class="material-symbols-outlined text-[16px]" data-icon="download">download</span></button>
+</div>
+</div>
+</div>
+<div class="p-4 bg-white">
+<div class="flex items-center justify-between">
+<span class="text-[10px] font-bold text-primary uppercase tracking-tighter">Banner Facebook</span>
+<span class="material-symbols-outlined text-slate-300 text-sm" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+</div>
+</div>
+<!-- Card 7: Small Square Skeleton -->
+<div class="masonry-item rounded-xl bg-surface-container-low p-1">
+<div class="aspect-square rounded-lg skeleton-shimmer flex items-center justify-center">
+<span class="material-symbols-outlined text-outline/30 text-3xl animate-spin" data-icon="sync">sync</span>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- FAB (Suppressed based on context: Galería allows quick addition) -->
+<button class="fixed bottom-8 right-8 w-14 h-14 bg-primary text-on-primary rounded-full shadow-2xl flex items-center justify-center active:scale-95 transition-transform z-50 group">
+<span class="material-symbols-outlined text-2xl group-hover:rotate-90 transition-transform" data-icon="add">add</span>
+</button>
+</body></html>
