@@ -1,4 +1,5 @@
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { createBrowserClient } from "@supabase/auth-helpers-nextjs";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -9,13 +10,11 @@ function createSupabaseBrowserClient(): SupabaseClient {
       "Faltan NEXT_PUBLIC_SUPABASE_URL o NEXT_PUBLIC_SUPABASE_ANON_KEY en el entorno.",
     );
   }
-  return createClient(supabaseUrl, supabaseAnonKey, {
-    auth: {
-      persistSession: true,
-      autoRefreshToken: true,
-    },
-  });
+  return createBrowserClient(supabaseUrl, supabaseAnonKey);
 }
 
-/** Cliente singleton para el navegador (hooks y componentes cliente). */
+/**
+ * Cliente de navegador alineado con @supabase/auth-helpers-nextjs
+ * (sesión en cookies, PKCE), mismo mecanismo que el login y el middleware.
+ */
 export const supabase = createSupabaseBrowserClient();
