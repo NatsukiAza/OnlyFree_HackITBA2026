@@ -2,6 +2,7 @@ import { createServerClient } from "@supabase/auth-helpers-nextjs";
 import { NextResponse, type NextRequest } from "next/server";
 
 const PROTECTED_PREFIXES = [
+  "/panel",
   "/mi-negocio",
   "/estrategia",
   "/estrategia-semanal",
@@ -65,7 +66,7 @@ export async function middleware(request: NextRequest) {
 
   if (user && path === "/login") {
     const url = request.nextUrl.clone();
-    url.pathname = "/mi-negocio";
+    url.pathname = "/panel";
     url.search = "";
     return copyCookiesTo(NextResponse.redirect(url));
   }

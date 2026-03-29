@@ -5,10 +5,12 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
 
+import { isValidUsername, normalizeUsername } from "@/lib/username";
+
 export function LoginPanel() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const nextPath = searchParams.get("next") ?? "/mi-negocio";
+  const nextPath = searchParams.get("next") ?? "/panel";
   const authError = searchParams.get("error");
 
   const supabase = useMemo(
@@ -22,12 +24,13 @@ export function LoginPanel() {
 
   const [mode, setMode] = useState<"login" | "register">("login");
   const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
 
-  const safeNext = nextPath.startsWith("/") ? nextPath : "/mi-negocio";
+  const safeNext = nextPath.startsWith("/") ? nextPath : "/panel";
 
   async function handleEmailAuth(e: React.FormEvent) {
     e.preventDefault();
@@ -36,13 +39,42 @@ export function LoginPanel() {
     setPending(true);
 
     if (mode === "register") {
+      const normalizedUser = normalizeUsername(username);
+      if (!isValidUsername(username)) {
+        setError(
+          "El nombre de usuario debe tener entre 3 y 20 caracteres (solo letras, números y guion bajo).",
+        );
+        setPending(false);
+        return;
+      }
+
+      const { data: free, error: rpcError } = await supabase.rpc(
+        "username_available",
+        { p_username: normalizedUser },
+      );
+      if (rpcError) {
+        setError(rpcError.message);
+        setPending(false);
+        return;
+      }
+      if (free !== true) {
+        setError(
+          free === false
+            ? "Ese nombre de usuario ya está en uso. Elegí otro."
+            : "No se pudo verificar el nombre de usuario. Probá de nuevo.",
+        );
+        setPending(false);
+        return;
+      }
+
       const { data, error: signUpError } = await supabase.auth.signUp({
         email: email.trim(),
         password,
         options: {
           emailRedirectTo: `${typeof window !== "undefined" ? window.location.origin : ""}/auth/callback?next=${encodeURIComponent(safeNext)}`,
           data: {
-            full_name: email.split("@")[0],
+            username: normalizedUser,
+            full_name: username.trim() || email.split("@")[0],
           },
         },
       });
@@ -119,6 +151,7 @@ export function LoginPanel() {
                 setMode("login");
                 setError(null);
                 setMessage(null);
+                setUsername("");
               }}
               className={
                 mode === "login"
@@ -182,6 +215,35 @@ export function LoginPanel() {
                 placeholder="tu@email.com"
               />
             </div>
+            {mode === "register" ? (
+              <div>
+                <label
+                  htmlFor="username"
+                  className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-on-surface-variant"
+                >
+                  Nombre de usuario
+                </label>
+                <input
+                  id="username"
+                  name="username"
+                  type="text"
+                  autoComplete="username"
+                  required
+                  value={username}
+                  onChange={(e) =>
+                    setUsername(e.target.value.replace(/[^a-zA-Z0-9_]/g, ""))
+                  }
+                  minLength={3}
+                  maxLength={20}
+                  className="w-full rounded-lg border-0 bg-surface-container-lowest px-4 py-3 ring-1 ring-outline-variant/30 outline-none transition-all focus:ring-2 focus:ring-primary-container/40"
+                  placeholder="tu_marca"
+                />
+                <p className="mt-1.5 text-xs text-on-surface-variant">
+                  Entre 3 y 20 caracteres: letras, números y guion bajo. Es
+                  público y único.
+                </p>
+              </div>
+            ) : null}
             <div>
               <label
                 htmlFor="password"

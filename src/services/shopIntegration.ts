@@ -19,14 +19,30 @@ export type ShopProduct = {
   name: string;
   description: string | null;
   price: number;
+  /** Imagen principal (primera de `images`; útil para vistas compactas). */
   image_url: string;
+  /** Galería: URLs públicas (mock Tiendanube). Datos viejos pueden no traer el array. */
+  images?: string[];
 };
 
-/** Respuesta completa del mock: catálogo + métricas para estrategia de marketing. */
+/** Carrito abandonado (mock) para estrategia de recuperación / email. */
+export type AbandonedCheckout = {
+  email: string;
+  product_name: string;
+  amount: number;
+};
+
+/** Respuesta completa del mock: catálogo + métricas + carritos abandonados. */
 export type ShopImportResult = {
   metrics: ShopMetrics;
   products: ShopProduct[];
+  /** Opcional: filas antiguas sin este campo se tratan como lista vacía. */
+  abandoned_checkouts?: AbandonedCheckout[];
 };
+
+/** URLs de Unsplash (imágenes reales); incluye un cuaderno verde como ejemplo de lifestyle. */
+const IMG_NOTEBOOK_GREEN =
+  "https://images.unsplash.com/photo-1517842645767-c957b772b402?w=600&auto=format&fit=crop";
 
 const MOCK_TECH_PRODUCTS: ShopProduct[] = [
   {
@@ -37,6 +53,11 @@ const MOCK_TECH_PRODUCTS: ShopProduct[] = [
     price: 349.99,
     image_url:
       "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop",
+    images: [
+      "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1484704849700-f032a568e944?w=600&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1583394838336-acd977736f90?w=600&auto=format&fit=crop",
+    ],
   },
   {
     id: "prod_002",
@@ -46,6 +67,11 @@ const MOCK_TECH_PRODUCTS: ShopProduct[] = [
     price: 109.99,
     image_url:
       "https://images.unsplash.com/photo-1527814050087-3793815479db?w=400&h=400&fit=crop",
+    images: [
+      "https://images.unsplash.com/photo-1527814050087-3793815479db?w=600&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1615663241807-9a1f273fe0d4?w=600&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1616588588556-c50ad3fb0472?w=600&auto=format&fit=crop",
+    ],
   },
   {
     id: "prod_003",
@@ -55,6 +81,11 @@ const MOCK_TECH_PRODUCTS: ShopProduct[] = [
     price: 119.0,
     image_url:
       "https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=400&h=400&fit=crop",
+    images: [
+      "https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=600&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1595225476474-87563707b212?w=600&auto=format&fit=crop",
+      IMG_NOTEBOOK_GREEN,
+    ],
   },
   {
     id: "prod_004",
@@ -64,6 +95,11 @@ const MOCK_TECH_PRODUCTS: ShopProduct[] = [
     price: 54.9,
     image_url:
       "https://images.unsplash.com/photo-1625948515291-69613efd103f?w=400&h=400&fit=crop",
+    images: [
+      "https://images.unsplash.com/photo-1625948515291-69613efd103f?w=600&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1587825140708-dfaf36ae64ba?w=600&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1541807084-5c52b6b3adef?w=600&auto=format&fit=crop",
+    ],
   },
   {
     id: "prod_005",
@@ -73,8 +109,29 @@ const MOCK_TECH_PRODUCTS: ShopProduct[] = [
     price: 199.0,
     image_url:
       "https://images.unsplash.com/photo-1587826080692-f439cd0b70da?w=400&h=400&fit=crop",
+    images: [
+      "https://images.unsplash.com/photo-1587826080692-f439cd0b70da?w=600&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1587825444208-1240f02347a6?w=600&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1606761568499-6d2451b23c66?w=600&auto=format&fit=crop",
+    ],
   },
 ];
+
+/**
+ * Mismas URLs que arma el import mock (galería Tiendanube simulada).
+ * Usar en UI de Activos como vista prevía cuando aún no hay fotos guardadas.
+ */
+export const MOCK_GALLERY_IMAGE_URLS: string[] = (() => {
+  const out: string[] = [];
+  for (const p of MOCK_TECH_PRODUCTS) {
+    if (Array.isArray(p.images) && p.images.length > 0) {
+      out.push(...p.images);
+    } else if (p.image_url?.trim()) {
+      out.push(p.image_url.trim());
+    }
+  }
+  return [...new Set(out)];
+})();
 
 /** Métricas alineadas a los ids mock (más vendido = MX Master, más visto = Sony). */
 const MOCK_METRICS: ShopMetrics = {
@@ -84,6 +141,30 @@ const MOCK_METRICS: ShopMetrics = {
   average_ticket: 45000,
 };
 
+/** Carritos abandonados de ejemplo para el agente (recuperación + n8n). */
+const MOCK_ABANDONED_CHECKOUTS: AbandonedCheckout[] = [
+  {
+    email: "lucia.mendez@gmail.com",
+    product_name: "Logitech MX Master 3S",
+    amount: 109.99,
+  },
+  {
+    email: "tomas.r@gmail.com",
+    product_name: "Sony WH-1000XM5",
+    amount: 349.99,
+  },
+  {
+    email: "vale.ferreira@outlook.com",
+    product_name: "Keychron K2 Pro",
+    amount: 119.0,
+  },
+  {
+    email: "nico.paez@yahoo.com",
+    product_name: "Anker PowerExpand 7-in-1",
+    amount: 54.9,
+  },
+];
+
 function delay(ms: number): Promise<void> {
   return new Promise((resolve) => {
     setTimeout(resolve, ms);
@@ -92,7 +173,7 @@ function delay(ms: number): Promise<void> {
 
 /**
  * Simula la obtención de catálogo + métricas desde Tienda Nube o Shopify (sin APIs reales).
- * Espera ~1,5s. Devuelve `{ metrics, products }` para alimentar la generación de estrategia.
+ * Espera ~1,5s. Devuelve métricas, productos y carritos abandonados (mock) para la estrategia.
  */
 export async function fetchShopProducts(
   platform: ShopPlatform,
@@ -101,8 +182,42 @@ export async function fetchShopProducts(
   await delay(1500);
   return {
     metrics: { ...MOCK_METRICS },
-    products: MOCK_TECH_PRODUCTS.map((p) => ({ ...p })),
+    products: MOCK_TECH_PRODUCTS.map((p) => ({
+      ...p,
+      images: [...(p.images ?? [])],
+    })),
+    abandoned_checkouts: MOCK_ABANDONED_CHECKOUTS.map((c) => ({ ...c })),
   };
+}
+
+/** Todas las URLs de galería de los productos importados (sin duplicados). */
+export function collectProductImageUrlsFromShopData(
+  data: ShopImportResult,
+): string[] {
+  const out: string[] = [];
+  for (const p of data.products) {
+    if (Array.isArray(p.images) && p.images.length > 0) {
+      out.push(...p.images);
+    } else if (p.image_url?.trim()) {
+      out.push(p.image_url.trim());
+    }
+  }
+  return [...new Set(out)];
+}
+
+/**
+ * Rellena `business_context.product_image_urls`: URLs del mock/import primero,
+ * después las cargadas manualmente en el formulario, sin duplicados.
+ */
+export function mergeShopAndManualImageUrls(
+  shopData: ShopImportResult | null | undefined,
+  manual: string[],
+): string[] {
+  const fromShop = shopData
+    ? collectProductImageUrlsFromShopData(shopData)
+    : [];
+  const cleaned = manual.map((u) => u.trim()).filter(Boolean);
+  return [...new Set([...fromShop, ...cleaned])];
 }
 
 /** Importa catálogo + métricas (mock; sin APIs reales). Mismo resultado que `fetchShopProducts`. */

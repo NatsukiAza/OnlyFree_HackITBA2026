@@ -19,6 +19,8 @@ import {
   formatWeekRangeLabel,
   getBuenosAiresWeekRange,
 } from "@/lib/weekRange";
+import { stripN8nAutomationForDisplay } from "@/lib/extractN8nAutomationPayload";
+import { stripStrategyPromptForDisplay } from "@/lib/pollinations";
 import {
   sectionsToDayItems,
   splitStrategyMarkdown,
@@ -188,6 +190,14 @@ export function EstrategiaSemanalView() {
     return last ? getTextFromParts(last) : "";
   }, [messages]);
 
+  const assistantMarkdownForDisplay = useMemo(
+    () =>
+      stripN8nAutomationForDisplay(
+        stripStrategyPromptForDisplay(assistantMarkdown),
+      ),
+    [assistantMarkdown],
+  );
+
   const cardItems = useMemo(() => {
     const sections = splitStrategyMarkdown(assistantMarkdown);
     return sectionsToDayItems(sections, weekStartDate);
@@ -231,36 +241,24 @@ export function EstrategiaSemanalView() {
 
   return (
     <div className="space-y-8">
-      <div className="mb-10 flex flex-col justify-between gap-6 md:flex-row md:items-end">
-        <div>
+      <div className="mb-10 flex flex-row items-center justify-between gap-3 sm:gap-6">
+        <div className="min-w-0 flex-1">
           <span className="mb-2 block text-xs font-bold uppercase tracking-widest text-primary">
             Calendario Editorial
           </span>
-          <h1 className="text-4xl font-extrabold tracking-tight text-on-surface">
+          <h1 className="truncate text-xl font-extrabold tracking-tight text-on-surface sm:text-3xl md:text-4xl">
             Estrategia de la semana: {weekLabel}
           </h1>
         </div>
-        <div className="flex flex-wrap gap-3">
+        <div className="shrink-0">
           <button
             type="button"
             onClick={() => void handleRegenerate()}
             disabled={busy}
-            className="inline-flex items-center gap-2 rounded-xl border border-outline-variant/50 bg-surface-container-low px-5 py-2.5 text-sm font-semibold text-on-surface transition-all hover:bg-surface-container-high disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-xl border border-outline-variant/50 bg-surface-container-low px-3 py-2 text-sm font-semibold text-on-surface transition-all hover:bg-surface-container-high disabled:opacity-50 sm:gap-2 sm:px-5 sm:py-2.5"
           >
             <span className="material-symbols-outlined text-base">refresh</span>
             Regenerar estrategia
-          </button>
-          <button
-            type="button"
-            className="rounded-xl bg-surface-container-high px-5 py-2.5 text-sm font-semibold text-on-surface transition-all hover:bg-surface-container-highest"
-          >
-            Exportar PDF
-          </button>
-          <button
-            type="button"
-            className="rounded-xl bg-gradient-to-r from-primary to-primary-container px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-primary/10 transition-all active:scale-95"
-          >
-            Guardar cambios
           </button>
         </div>
       </div>
@@ -284,7 +282,7 @@ export function EstrategiaSemanalView() {
             {assistantMarkdown ? (
               <>
                 <ReactMarkdown components={streamingMarkdownComponents}>
-                  {assistantMarkdown}
+                  {assistantMarkdownForDisplay}
                 </ReactMarkdown>
                 {showTypingCaret ? (
                   <span
@@ -340,7 +338,7 @@ export function EstrategiaSemanalView() {
         </p>
         <button
           type="button"
-          className="inline-flex items-center gap-3 rounded-2xl border-2 border-dashed border-outline-variant bg-surface-container-low px-8 py-4 font-bold text-on-surface transition-all hover:border-primary hover:bg-white"
+          className="inline-flex items-center gap-3 rounded-2xl border-2 border-dashed border-outline-variant bg-surface-container-low px-8 py-4 font-bold text-on-surface transition-all hover:border-primary hover:bg-surface-container-highest"
         >
           <span className="material-symbols-outlined">add_circle</span>
           Añadir día de contenido

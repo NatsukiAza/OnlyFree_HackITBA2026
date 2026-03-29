@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Plus_Jakarta_Sans } from "next/font/google";
+
 import "./globals.css";
 
 const inter = Inter({
@@ -14,9 +15,9 @@ const plusJakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Editorial Studio — Marketing Hub",
+  title: "MarketMate",
   description:
-    "Estrategia de marketing y contenido para PYMEs, con tendencias actuales.",
+    "Generacion de estrategias de marketing automatizado.",
 };
 
 export default function RootLayout({
@@ -25,10 +26,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="es"
-      className={`light ${inter.variable} ${plusJakarta.variable}`}
-    >
+    <html lang="es" className={`${inter.variable} ${plusJakarta.variable}`}>
       <head>
         <link
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0"

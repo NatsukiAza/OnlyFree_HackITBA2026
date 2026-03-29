@@ -5,6 +5,10 @@ export type StrategySection = {
   title: string;
   /** Markdown del bloque (sin el encabezado ### inicial). */
   bodyMarkdown: string;
+  /**
+   * false = texto antes del primer ### (intro / resumen). No consume un día del calendario.
+   */
+  assignCalendarDay: boolean;
 };
 
 /**
@@ -16,23 +20,34 @@ export function splitStrategyMarkdown(markdown: string): StrategySection[] {
 
   const parts = trimmed.split(/\n(?=###\s)/);
 
-  return parts.map((chunk, i) => {
-    const lines = chunk.trim().split("\n");
+  let sectionIndex = 0;
+  return parts.flatMap((chunk): StrategySection[] => {
+    const trimmedChunk = chunk.trim();
+    if (!trimmedChunk) return [];
+
+    const i = sectionIndex++;
+    const lines = trimmedChunk.split("\n");
     const first = lines[0] ?? "";
     if (first.startsWith("###")) {
       const title = first.replace(/^#+\s*/, "").trim();
       const bodyMarkdown = lines.slice(1).join("\n").trim();
-      return {
-        id: `section-${i}-${hashId(title)}`,
-        title: title || `Bloque ${i + 1}`,
-        bodyMarkdown,
-      };
+      return [
+        {
+          id: `section-${i}-${hashId(title)}`,
+          title: title || `Bloque ${i + 1}`,
+          bodyMarkdown,
+          assignCalendarDay: true,
+        },
+      ];
     }
-    return {
-      id: `section-${i}`,
-      title: "Plan semanal",
-      bodyMarkdown: chunk.trim(),
-    };
+    return [
+      {
+        id: `section-${i}`,
+        title: "Plan semanal",
+        bodyMarkdown: trimmedChunk,
+        assignCalendarDay: false,
+      },
+    ];
   });
 }
 
@@ -62,18 +77,28 @@ export function sectionsToDayItems(
   sections: StrategySection[],
   weekStartDate: string,
 ): EstrategiaDayItem[] {
+  let dayIndex = 0;
+  const firstCalendarIdx = sections.findIndex((s) => s.assignCalendarDay);
+
   return sections.map((s, index) => {
-    const { calendarDay, weekday } = calendarForSectionIndex(
-      weekStartDate,
-      index,
-    );
+    const showCalendar = s.assignCalendarDay;
+    const { calendarDay, weekday } = showCalendar
+      ? calendarForSectionIndex(weekStartDate, dayIndex++)
+      : { calendarDay: "", weekday: "" };
+
+    const isFirstDayCard =
+      showCalendar &&
+      firstCalendarIdx >= 0 &&
+      index === firstCalendarIdx;
+
     return {
       id: s.id,
       calendarDay,
       weekday,
+      showCalendarColumn: showCalendar,
       title: s.title,
       body: s.bodyMarkdown,
-      emphasized: index === 0,
+      emphasized: isFirstDayCard,
     };
   });
 }

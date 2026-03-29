@@ -10,6 +10,9 @@ import {
   type GeneratedImage,
 } from "@/lib/pollinations";
 
+/** Texto accesible para <img>; el prompt técnico no se muestra en la UI. */
+const FLUX_IMAGE_ALT = "Imagen generada con Flux Engine";
+
 type BusinessCtx = {
   id: string;
   name: string | null;
@@ -205,7 +208,7 @@ export default function ContenidoIaView() {
   const hasPrompt = !!urlPrompt;
 
   return (
-    <main className="min-h-screen px-6 pb-12 pt-24 md:ml-64">
+    <main className="min-h-screen px-6 pb-12 pt-24">
       <div className="mx-auto max-w-screen-lg">
         {/* Header */}
         <header className="mb-10">
@@ -247,14 +250,16 @@ export default function ContenidoIaView() {
             </div>
           )}
 
-          {/* Prompt textarea */}
+          {/* Prompt: valor interno siempre alimenta Flux; oculto en pantalla si viene de la estrategia hasta "Ajustar" */}
           <div className="mb-6">
             <div className="mb-2 flex items-center justify-between">
               <label
                 htmlFor="prompt-field"
                 className="text-sm font-bold text-on-surface"
               >
-                {hasPrompt ? "Prompt sugerido por Claude" : "Prompt personalizado"}
+                {hasPrompt
+                  ? "Prompt desde tu estrategia"
+                  : "Prompt personalizado"}
               </label>
               {hasPrompt && !editable && (
                 <button
@@ -271,15 +276,27 @@ export default function ContenidoIaView() {
               id="prompt-field"
               rows={3}
               readOnly={hasPrompt && !editable}
-              value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
-              placeholder="Describí la imagen que querés generar…"
+              value={hasPrompt && !editable ? "" : prompt}
+              onChange={(e) => {
+                if (hasPrompt && !editable) return;
+                setPrompt(e.target.value);
+              }}
+              placeholder={
+                hasPrompt && !editable
+                  ? "El detalle técnico del prompt no se muestra; Flux ya lo aplicó. Usá «Ajustar prompt» solo si querés editarlo."
+                  : "Describí la imagen que querés generar…"
+              }
               className={`w-full resize-none rounded-xl border px-4 py-3 text-sm leading-relaxed text-on-surface transition-colors placeholder:text-outline ${
                 hasPrompt && !editable
                   ? "cursor-default border-outline-variant/40 bg-surface-container-low"
                   : "border-outline-variant/60 bg-white focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
               }`}
             />
+            {hasPrompt && !editable ? (
+              <p className="mt-2 text-xs text-on-surface-variant">
+                El texto que envía tu plan a Flux no se muestra aquí para mantener la vista limpia.
+              </p>
+            ) : null}
           </div>
 
           {/* Generate / Regenerate / Reintentar (si falló la carga, mostrar aunque el prompt venga de la URL) */}
@@ -332,7 +349,7 @@ export default function ContenidoIaView() {
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={generated.displayUrl}
-                  alt={generated.enrichedPrompt}
+                  alt={FLUX_IMAGE_ALT}
                   className="aspect-square w-full object-cover"
                 />
                 <div className="absolute inset-0 flex items-end bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100">
@@ -474,7 +491,7 @@ function GalleryCard({
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={image.image_url}
-          alt={image.prompt}
+          alt={FLUX_IMAGE_ALT}
           className="h-full w-full object-cover"
           loading="lazy"
         />
@@ -485,9 +502,6 @@ function GalleryCard({
         </div>
         <div className="absolute inset-0 flex items-end bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100">
           <div className="w-full space-y-2 p-4">
-            <p className="line-clamp-2 text-xs text-white/90">
-              {image.prompt}
-            </p>
             <div className="flex gap-2">
               <button
                 type="button"

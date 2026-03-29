@@ -2,7 +2,7 @@ import { BusinessForm } from "@/components/BusinessForm";
 
 export default function MiNegocioPage() {
   return (
-    <main className="mx-auto ml-64 max-w-5xl flex-1 p-8">
+    <main className="mx-auto max-w-5xl flex-1 p-8">
       <div className="mb-12">
         <h1 className="mb-3 text-4xl font-extrabold tracking-tight text-on-background">
           Onboarding Inteligente
