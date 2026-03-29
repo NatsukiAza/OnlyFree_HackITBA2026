@@ -22,8 +22,10 @@ export type IdentityExtendedState = {
   premiumProduct: string;
   brandTraits: string[];
   uniqueDifferential: string;
-  genderTarget: TargetGender;
-  ageCenter: number;
+  /** Al menos un género. */
+  genderTargets: TargetGender[];
+  ageMin: number;
+  ageMax: number;
   geographicProximity: boolean;
   socialObjective: SocialObjective;
 };
@@ -32,10 +34,11 @@ export const IDENTITY_EXTENDED_DEFAULT: IdentityExtendedState = {
   whatYouSell: "",
   starProduct: "",
   premiumProduct: "",
-  brandTraits: ["Premium"],
+  brandTraits: [],
   uniqueDifferential: "",
-  genderTarget: "mujer",
-  ageCenter: 35,
+  genderTargets: ["mujer"],
+  ageMin: 25,
+  ageMax: 45,
   geographicProximity: false,
   socialObjective: "vender",
 };
@@ -173,10 +176,25 @@ export function IdentityProductsDifferential({
   );
 }
 
-function ageBand(center: number): { low: number; high: number } {
-  const low = Math.max(13, center - 10);
-  const high = Math.min(100, center + 10);
-  return { low, high };
+const GENDER_OPTIONS = ["hombre", "mujer", "otro"] as const satisfies readonly TargetGender[];
+
+function normalizeGenderTargets(raw: unknown): TargetGender[] {
+  const allowed = new Set<TargetGender>(GENDER_OPTIONS);
+  if (Array.isArray(raw)) {
+    const next = [
+      ...new Set(
+        raw.filter(
+          (g): g is TargetGender =>
+            typeof g === "string" && allowed.has(g as TargetGender),
+        ),
+      ),
+    ];
+    return next.length > 0 ? next : ["mujer"];
+  }
+  if (typeof raw === "string" && allowed.has(raw as TargetGender)) {
+    return [raw as TargetGender];
+  }
+  return ["mujer"];
 }
 
 /** Panel carrusel: público objetivo (slide separado). */
@@ -188,7 +206,18 @@ export function IdentityTargetAudience({
   const patch = (partial: Partial<IdentityExtendedState>) =>
     onChange({ ...values, ...partial });
 
-  const { low, high } = ageBand(values.ageCenter);
+  const toggleGender = (id: TargetGender) => {
+    const set = new Set(values.genderTargets);
+    if (set.has(id)) {
+      if (set.size <= 1) return;
+      set.delete(id);
+    } else {
+      set.add(id);
+    }
+    patch({ genderTargets: Array.from(set) as TargetGender[] });
+  };
+
+  const ageCenterLabel = Math.round((values.ageMin + values.ageMax) / 2);
 
   return (
     <section className="grid grid-cols-1 gap-8 md:grid-cols-12">
@@ -204,57 +233,94 @@ export function IdentityTargetAudience({
       </div>
       <div className="space-y-10 rounded-2xl border border-outline-variant/20 bg-surface-container-lowest p-8 shadow-sm md:col-span-8">
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
-          <div>
+          <div className="md:col-span-2">
             <p className="mb-4 text-xs font-bold uppercase tracking-wider text-on-surface-variant">
-              Género
+              Género (elegí uno o más)
             </p>
-            <div className="flex gap-2">
-              {(
-                [
-                  { id: "hombre" as const, label: "Hombre" },
-                  { id: "mujer" as const, label: "Mujer" },
-                  { id: "otro" as const, label: "Otro" },
-                ] as const
-              ).map(({ id, label }) => (
-                <button
-                  key={id}
-                  type="button"
-                  disabled={disabled}
-                  onClick={() => patch({ genderTarget: id })}
-                  className={
-                    values.genderTarget === id
-                      ? "flex flex-1 items-center justify-center gap-2 rounded-xl border-2 border-primary bg-primary/5 py-3 text-sm font-bold text-primary transition-all"
-                      : "flex flex-1 items-center justify-center gap-2 rounded-xl border border-outline-variant/40 py-3 text-sm font-bold text-on-background transition-all hover:bg-surface-container-low"
-                  }
-                >
-                  {label}
-                </button>
-              ))}
+            <div className="flex flex-wrap gap-2">
+              {GENDER_OPTIONS.map((id) => {
+                const selected = values.genderTargets.includes(id);
+                return (
+                  <button
+                    key={id}
+                    type="button"
+                    disabled={disabled}
+                    onClick={() => toggleGender(id)}
+                    className={
+                      selected
+                        ? "rounded-full border-2 border-primary bg-primary/10 px-4 py-2.5 text-sm font-bold text-primary transition-colors"
+                        : "rounded-full border border-outline-variant/40 px-4 py-2.5 text-sm font-bold text-on-background transition-colors hover:bg-surface-container-low"
+                    }
+                  >
+                    {id === "hombre"
+                      ? "Hombre"
+                      : id === "mujer"
+                        ? "Mujer"
+                        : "Otro"}
+                  </button>
+                );
+              })}
             </div>
-          </div>
-          <div>
-            <p className="mb-4 text-xs font-bold uppercase tracking-wider text-on-surface-variant">
-              Rango de Edades
+            <p className="mt-2 text-xs text-on-surface-variant">
+              Al menos tenés que dejar uno seleccionado.
             </p>
-            <div className="px-2 pt-4">
-              <input
-                className="h-1 w-full cursor-pointer appearance-none rounded-lg bg-surface-container-high accent-primary"
-                type="range"
-                min={13}
-                max={100}
-                value={values.ageCenter}
-                onChange={(e) =>
-                  patch({ ageCenter: Number(e.target.value) || 35 })
-                }
-                disabled={disabled}
-                name="ageCenter"
-              />
-              <div className="mt-2 flex justify-between text-[10px] font-bold text-on-surface-variant">
-                <span>13 años</span>
-                <span className="rounded bg-primary/10 px-2 py-0.5 text-primary">
-                  {low} - {high} años
+          </div>
+          <div className="md:col-span-2">
+            <p className="mb-4 text-xs font-bold uppercase tracking-wider text-on-surface-variant">
+              Rango de edades
+            </p>
+            <div className="space-y-5 px-2 pt-1">
+              <div>
+                <div className="mb-2 flex justify-between text-xs font-semibold text-on-surface">
+                  <span>Desde</span>
+                  <span className="text-primary">{values.ageMin} años</span>
+                </div>
+                <input
+                  className="h-1 w-full cursor-pointer appearance-none rounded-lg bg-surface-container-high accent-primary"
+                  type="range"
+                  min={13}
+                  max={values.ageMax}
+                  value={values.ageMin}
+                  onChange={(e) => {
+                    const v = Number(e.target.value) || 13;
+                    patch({ ageMin: v });
+                  }}
+                  disabled={disabled}
+                  name="ageMin"
+                  aria-label="Edad mínima del público objetivo"
+                />
+              </div>
+              <div>
+                <div className="mb-2 flex justify-between text-xs font-semibold text-on-surface">
+                  <span>Hasta</span>
+                  <span className="text-primary">{values.ageMax} años</span>
+                </div>
+                <input
+                  className="h-1 w-full cursor-pointer appearance-none rounded-lg bg-surface-container-high accent-primary"
+                  type="range"
+                  min={values.ageMin}
+                  max={100}
+                  value={values.ageMax}
+                  onChange={(e) => {
+                    const v = Number(e.target.value) || 100;
+                    patch({ ageMax: v });
+                  }}
+                  disabled={disabled}
+                  name="ageMax"
+                  aria-label="Edad máxima del público objetivo"
+                />
+              </div>
+              <div className="flex flex-wrap items-center justify-center gap-2 rounded-xl bg-primary/5 px-3 py-2 text-center text-sm">
+                <span className="font-bold text-primary">
+                  {values.ageMin} – {values.ageMax} años
                 </span>
-                <span>100 años</span>
+                <span className="text-on-surface-variant">·</span>
+                <span className="text-on-surface-variant">
+                  Centro del rango:{" "}
+                  <span className="font-semibold text-on-surface">
+                    {ageCenterLabel} años
+                  </span>
+                </span>
               </div>
             </div>
           </div>
@@ -377,10 +443,18 @@ export function validateIdentityProducts(
   return null;
 }
 
-/** Panel con defaults; no bloquea avance. */
 export function validateIdentityAudience(
-  _v: IdentityExtendedState,
+  v: IdentityExtendedState,
 ): string | null {
+  if (v.genderTargets.length === 0) {
+    return "Elegí al menos un género en público objetivo.";
+  }
+  if (v.ageMin > v.ageMax) {
+    return "Ajustá el rango de edades (desde no puede ser mayor que hasta).";
+  }
+  if (v.ageMin < 13 || v.ageMax > 100) {
+    return "El rango de edades debe estar entre 13 y 100 años.";
+  }
   return null;
 }
 
@@ -394,10 +468,11 @@ export function identityExtendedFromRow(
     brandTraits:
       Array.isArray(row.brand_traits) && row.brand_traits.length > 0
         ? row.brand_traits
-        : ["Premium"],
+        : [],
     uniqueDifferential: row.unique_differential ?? "",
-    genderTarget: row.target_gender ?? "mujer",
-    ageCenter: row.target_age_center ?? 35,
+    genderTargets: normalizeGenderTargets(row.target_genders),
+    ageMin: row.target_age_min ?? 25,
+    ageMax: row.target_age_max ?? 45,
     geographicProximity: row.geographic_proximity ?? false,
     socialObjective: row.social_objective ?? "vender",
   };
@@ -411,8 +486,9 @@ export function identityFieldsForUpsert(v: IdentityExtendedState) {
     premium_product: v.premiumProduct.trim() || null,
     brand_traits: v.brandTraits,
     unique_differential: v.uniqueDifferential.trim() || null,
-    target_gender: v.genderTarget,
-    target_age_center: v.ageCenter,
+    target_genders: [...new Set(v.genderTargets)] as TargetGender[],
+    target_age_min: v.ageMin,
+    target_age_max: v.ageMax,
     geographic_proximity: v.geographicProximity,
     social_objective: v.socialObjective,
   };

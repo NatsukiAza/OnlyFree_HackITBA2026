@@ -136,10 +136,10 @@ export function LoginPanel() {
             href="/"
             className="inline-block bg-gradient-to-r from-indigo-600 to-indigo-400 bg-clip-text text-2xl font-bold text-transparent"
           >
-            Editorial Studio
+            MarketMate
           </Link>
           <p className="mt-2 text-sm text-on-surface-variant">
-            Marketing Hub para tu PYME
+            Estrategias de Marketing
           </p>
         </div>
 
