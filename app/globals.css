@@ -127,6 +127,21 @@ input[type="range"]::-webkit-slider-runnable-track {
   }
 }
 
+@keyframes typing-caret-blink {
+  0%,
+  45% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+.typing-caret {
+  animation: typing-caret-blink 1s step-end infinite;
+}
+
 body {
   background-color: var(--color-background);
   color: var(--color-on-background);

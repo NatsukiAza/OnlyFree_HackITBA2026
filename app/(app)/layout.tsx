@@ -1,10 +1,17 @@
 "use client";
 
+import { createBrowserClient } from "@supabase/auth-helpers-nextjs";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useMemo } from "react";
 
 const AVATAR_SRC =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuCjhKAv5BfX7pDpbD-_D-1YwMyKr783E84P01X_3IhbrP2pO-noMK8oiLgi_p0ib0SPmlteum5gYdJy1UukmrXmhUwhyC3lj6B5D87-rpZsoXhU12omZr3Jj4ZrTfkSwnNpnriB3JwkLgNbbSIhabFOoGz2aNHHZYVf754qZMRevz8NjekH2SnX3UzsexqJtv9m1Ej_E_3iCLaM5-itmoThAAwYXaoN6wGObhzvspO9fYaXbv9bd5eETeIP_CCn42EZ_70X6UDzmdtz";
+
+function routeMatches(pathname: string, href: string) {
+  if (href === "/") return pathname === "/";
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
 
 export default function AppShellLayout({
   children,
@@ -12,24 +19,40 @@ export default function AppShellLayout({
   children: React.ReactNode;
 }>) {
   const pathname = usePathname();
+  const router = useRouter();
+
+  const supabase = useMemo(
+    () =>
+      createBrowserClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      ),
+    [],
+  );
 
   const active =
     "flex items-center gap-3 px-4 py-3 bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 rounded-xl shadow-sm font-['Inter'] text-sm font-medium";
   const idle =
     "flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:translate-x-1 transition-transform font-['Inter'] text-sm font-medium hover:text-indigo-500";
 
-  const is = (path: string) =>
-    path === "/" ? pathname === "/" : pathname.startsWith(path);
+  const is = (href: string) => routeMatches(pathname, href);
+
+  async function handleSignOut() {
+    await supabase.auth.signOut();
+    router.push("/login");
+    router.refresh();
+  }
 
   return (
     <div className="flex min-h-screen pt-16">
-      <header className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl fixed top-0 z-40 h-16 w-full shadow-sm shadow-slate-200/50 dark:shadow-none">
+      <header className="fixed top-0 z-40 h-16 w-full bg-white/80 shadow-sm shadow-slate-200/50 backdrop-blur-xl dark:bg-slate-900/80 dark:shadow-none">
         <div className="mx-auto flex h-full w-full max-w-screen-2xl items-center justify-between px-6">
-          <div className="flex items-center gap-4">
-            <span className="bg-gradient-to-r from-indigo-600 to-indigo-400 bg-clip-text text-xl font-bold text-transparent">
-              Editorial Studio
-            </span>
-          </div>
+          <Link
+            href="/"
+            className="bg-gradient-to-r from-indigo-600 to-indigo-400 bg-clip-text text-xl font-bold text-transparent"
+          >
+            Editorial Studio
+          </Link>
           <div className="flex items-center gap-4">
             <button
               type="button"
@@ -73,13 +96,13 @@ export default function AppShellLayout({
         </div>
         <nav className="flex flex-grow flex-col gap-1">
           <Link
-            href="/"
-            className={is("/") ? active : idle}
-            aria-current={is("/") ? "page" : undefined}
+            href="/mi-negocio"
+            className={is("/mi-negocio") ? active : idle}
+            aria-current={is("/mi-negocio") ? "page" : undefined}
           >
             <span
               className={
-                is("/")
+                is("/mi-negocio")
                   ? "material-symbols-outlined text-indigo-600"
                   : "material-symbols-outlined"
               }
@@ -89,13 +112,13 @@ export default function AppShellLayout({
             Mi Negocio
           </Link>
           <Link
-            href="/estrategia"
-            className={is("/estrategia") ? active : idle}
-            aria-current={is("/estrategia") ? "page" : undefined}
+            href="/estrategia-semanal"
+            className={is("/estrategia-semanal") ? active : idle}
+            aria-current={is("/estrategia-semanal") ? "page" : undefined}
           >
             <span
               className={
-                is("/estrategia")
+                is("/estrategia-semanal")
                   ? "material-symbols-outlined text-indigo-600"
                   : "material-symbols-outlined"
               }
@@ -138,6 +161,14 @@ export default function AppShellLayout({
           </Link>
         </nav>
         <div className="mt-auto flex flex-col gap-1 border-t border-slate-200/50 pt-4">
+          <button
+            type="button"
+            onClick={handleSignOut}
+            className="flex items-center gap-3 px-4 py-3 text-left font-['Inter'] text-sm font-medium text-slate-500 hover:text-indigo-500 dark:text-slate-400"
+          >
+            <span className="material-symbols-outlined">logout</span>
+            Cerrar sesión
+          </button>
           <a
             className="flex items-center gap-3 px-4 py-3 font-['Inter'] text-sm font-medium text-slate-500 hover:text-indigo-500 dark:text-slate-400"
             href="#"

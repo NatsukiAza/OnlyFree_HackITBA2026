@@ -1,0 +1,281 @@
+import { anthropic } from "@ai-sdk/anthropic";
+import { createServerClient } from "@supabase/auth-helpers-nextjs";
+import { convertToModelMessages, streamText, type UIMessage } from "ai";
+import { cookies } from "next/headers";
+
+import { getBuenosAiresWeekRange } from "@/lib/weekRange";
+
+type ChatBody = {
+  userId?: string;
+  messages?: unknown;
+};
+
+function formatShopProducts(shopData: unknown): string {
+  if (shopData == null || typeof shopData !== "object") {
+    return "(Sin shop_data importado; proponé contenido acorde al rubro.)";
+  }
+  const raw = shopData as {
+    products?: Array<{
+      name?: string;
+      price?: number;
+      description?: string | null;
+    }>;
+  };
+  const products = raw.products;
+  if (!Array.isArray(products) || products.length === 0) {
+    return "(shop_data sin productos; inferí desde el rubro y la descripción.)";
+  }
+  return products
+    .map((p, i) => {
+      const name = p.name ?? `Producto ${i + 1}`;
+      const price = p.price != null ? ` — $${p.price}` : "";
+      const desc = (p.description ?? "").slice(0, 180);
+      return `• ${name}${price}${desc ? ` — ${desc}` : ""}`;
+    })
+    .join("\n");
+}
+
+function formatShopMetrics(shopData: unknown): string {
+  if (shopData == null || typeof shopData !== "object") {
+    return "(Sin métricas importadas.)";
+  }
+  const m = (shopData as { metrics?: Record<string, unknown> }).metrics;
+  if (!m || typeof m !== "object") {
+    return "(Sin bloque metrics en shop_data.)";
+  }
+  const lines: string[] = [];
+  if ("best_seller_id" in m) lines.push(`Más vendido (id): ${String(m.best_seller_id)}`);
+  if ("most_viewed_id" in m) lines.push(`Más visto (id): ${String(m.most_viewed_id)}`);
+  if ("total_sales_month" in m)
+    lines.push(`Ventas del mes: ${String(m.total_sales_month)}`);
+  if ("average_ticket" in m)
+    lines.push(`Ticket promedio: ${String(m.average_ticket)}`);
+  return lines.length > 0 ? lines.join("\n") : JSON.stringify(m, null, 2);
+}
+
+function buildSystemPrompt(ctx: {
+  businessName: string;
+  rubro: string;
+  description: string;
+  availabilityHours: number;
+  shopProducts: string;
+  shopMetrics: string;
+}): string {
+  return `Actúa como un Director de Marketing Digital. Tu tarea es generar un Plan Semanal de Acción basado estrictamente en las availability_hours del usuario.
+
+HERRAMIENTAS DISPONIBLES (Debes mencionarlas en las tareas):
+
+Generador de Imágenes IA: Úsalo para tareas de diseño de producto o fotos lifestyle.
+
+Automatización n8n: Úsalo para recupero de carritos, emails automáticos o sincronización de stock.
+
+Métricas de Tienda: Prioriza los 'Best Sellers' extraídos del shop_data.
+
+REGLAS DE DISTRIBUCIÓN DE TIEMPO:
+
+Si el usuario tiene < 5hs: Máximo 2 tareas de alto impacto.
+
+Si tiene 5-15hs: 3 a 4 tareas mezclando contenido y automatización.
+
+Si tiene > 15hs: Plan diario completo (lunes a viernes).
+
+FORMATO DE SALIDA:
+No saludes. No digas 'Aquí tienes tu plan'. Genera directamente los días en este formato:
+
+[Día]: [Título de la Acción]
+Acción: [Descripción clara de qué hacer]
+Herramienta: [IA Image / n8n / Manual]
+Por qué: [Justificación basada en métricas o horas disponibles]
+
+Para la vista en la app, cada día o bloque principal debe empezar con un encabezado Markdown en la forma:
+### [Día o nombre del bloque]: [Título corto]
+Luego el detalle en líneas con las etiquetas Acción / Herramienta / Por qué como texto o listas.
+
+Cuando la Herramienta sea "IA Image", en la línea de Acción incluí una descripción visual detallada en inglés entre corchetes [prompt: ...] que sirva como prompt para un generador de imágenes.
+
+CONTEXTO DEL NEGOCIO (úsalo para personalizar acciones y el "Por qué"):
+- Nombre: ${ctx.businessName}
+- Rubro: ${ctx.rubro}
+- Descripción: ${ctx.description}
+- Horas semanales disponibles (availability_hours): ${ctx.availabilityHours}
+- Catálogo / productos (shop_data): ${ctx.shopProducts}
+- Métricas de tienda (shop_data; priorizar best sellers alineados con estos datos): ${ctx.shopMetrics}`;
+}
+
+/**
+ * POST /api/chat
+ * Body: { "userId": "<uuid>", "messages": UIMessage[] } (+ metadatos del transporte).
+ *
+ * Respuesta: stream de texto (`toTextStreamResponse`) para `TextStreamChatTransport`.
+ */
+export async function POST(request: Request) {
+  if (!process.env.ANTHROPIC_API_KEY) {
+    return new Response(
+      JSON.stringify({
+        error:
+          "Falta ANTHROPIC_API_KEY en el entorno del servidor para generar con Anthropic.",
+      }),
+      { status: 500, headers: { "Content-Type": "application/json" } },
+    );
+  }
+
+  let body: ChatBody;
+  try {
+    body = (await request.json()) as ChatBody;
+  } catch {
+    return new Response(JSON.stringify({ error: "Cuerpo JSON inválido." }), {
+      status: 400,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
+  const userId = body.userId;
+  if (!userId || typeof userId !== "string") {
+    return new Response(JSON.stringify({ error: "userId es requerido." }), {
+      status: 400,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
+  if (!Array.isArray(body.messages) || body.messages.length === 0) {
+    return new Response(
+      JSON.stringify({ error: "messages es requerido y no puede estar vacío." }),
+      {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      },
+    );
+  }
+
+  let modelMessages;
+  try {
+    modelMessages = await convertToModelMessages(body.messages as UIMessage[]);
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "No se pudieron convertir los mensajes.";
+    return new Response(JSON.stringify({ error: msg }), {
+      status: 400,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
+  const cookieStore = await cookies();
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return cookieStore.getAll();
+        },
+        setAll(cookiesToSet) {
+          try {
+            cookiesToSet.forEach(({ name, value, options }) =>
+              cookieStore.set(name, value, options),
+            );
+          } catch {
+            /* ignore */
+          }
+        },
+      },
+    },
+  );
+
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    return new Response(JSON.stringify({ error: "No autenticado." }), {
+      status: 401,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
+  if (user.id !== userId) {
+    return new Response(
+      JSON.stringify({ error: "userId no coincide con la sesión." }),
+      { status: 403, headers: { "Content-Type": "application/json" } },
+    );
+  }
+
+  const { data: row, error: rowError } = await supabase
+    .from("business_context")
+    .select("id, name, rubro, description, availability_hours, shop_data")
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (rowError) {
+    return new Response(JSON.stringify({ error: rowError.message }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
+  if (!row) {
+    return new Response(
+      JSON.stringify({ error: "No hay negocio cargado para este usuario." }),
+      { status: 404, headers: { "Content-Type": "application/json" } },
+    );
+  }
+
+  const shopProducts = formatShopProducts(row.shop_data);
+  const shopMetrics = formatShopMetrics(row.shop_data);
+
+  const system = buildSystemPrompt({
+    businessName: row.name?.trim() || "(sin nombre)",
+    rubro: row.rubro,
+    description: row.description?.trim() || "(no provista)",
+    availabilityHours: row.availability_hours,
+    shopProducts,
+    shopMetrics,
+  });
+
+  const businessId = row.id;
+
+  const result = streamText({
+    model: anthropic("claude-sonnet-4-6"),
+    system,
+    messages: modelMessages,
+    onFinish: async ({ text }) => {
+      const trimmed = text.trim();
+      if (!trimmed) return;
+
+      const { weekStartDate, weekEndDate } = getBuenosAiresWeekRange();
+      const title = `Plan semanal ${weekStartDate} — ${weekEndDate}`;
+      const content = {
+        markdown: trimmed,
+        model: "claude-sonnet-4-6",
+        generated_at: new Date().toISOString(),
+      };
+
+      const { data: existing } = await supabase
+        .from("strategies")
+        .select("id")
+        .eq("business_id", businessId)
+        .eq("week_start_date", weekStartDate)
+        .maybeSingle();
+
+      if (existing?.id) {
+        await supabase
+          .from("strategies")
+          .update({
+            week_end_date: weekEndDate,
+            title,
+            content,
+          })
+          .eq("id", existing.id);
+      } else {
+        await supabase.from("strategies").insert({
+          business_id: businessId,
+          week_start_date: weekStartDate,
+          week_end_date: weekEndDate,
+          title,
+          content,
+        });
+      }
+    },
+  });
+
+  return result.toTextStreamResponse();
+}

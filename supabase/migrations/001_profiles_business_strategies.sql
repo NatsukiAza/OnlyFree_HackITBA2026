@@ -28,19 +28,42 @@ CREATE TABLE public.business_context (
   name TEXT NOT NULL,
   rubro TEXT NOT NULL,
   description TEXT,
-  availability_days SMALLINT NOT NULL DEFAULT 3
-    CHECK (availability_days >= 1 AND availability_days <= 7),
+  availability_hours SMALLINT NOT NULL DEFAULT 3
+    CHECK (availability_hours >= 1 AND availability_hours <= 6),
   shopify_url TEXT,
   tienda_nube_url TEXT,
   product_image_urls TEXT[] NOT NULL DEFAULT '{}',
+  what_you_sell TEXT,
+  star_product TEXT,
+  premium_product TEXT,
+  brand_traits TEXT[] NOT NULL DEFAULT '{}',
+  unique_differential TEXT,
+  target_gender TEXT NOT NULL DEFAULT 'mujer'
+    CHECK (target_gender IN ('hombre', 'mujer', 'otro')),
+  target_age_center SMALLINT NOT NULL DEFAULT 35
+    CHECK (target_age_center >= 13 AND target_age_center <= 100),
+  geographic_proximity BOOLEAN NOT NULL DEFAULT false,
+  social_objective TEXT NOT NULL DEFAULT 'vender'
+    CHECK (social_objective IN ('conocer', 'vender', 'comunidad', 'fidelizar')),
+  shop_data JSONB,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   CONSTRAINT business_context_one_per_user UNIQUE (user_id)
 );
 
 COMMENT ON TABLE public.business_context IS 'Contexto del negocio: identidad, disponibilidad, tiendas e imágenes';
-COMMENT ON COLUMN public.business_context.availability_days IS 'Días/semana dedicados al marketing (1–7)';
+COMMENT ON COLUMN public.business_context.availability_hours IS 'Horas semanales dedicadas al marketing (1–6)';
 COMMENT ON COLUMN public.business_context.product_image_urls IS 'URLs de fotos de productos (Storage u externas)';
+COMMENT ON COLUMN public.business_context.what_you_sell IS 'Qué vende el negocio (producto/servicio principal)';
+COMMENT ON COLUMN public.business_context.star_product IS 'Producto o servicio estrella';
+COMMENT ON COLUMN public.business_context.premium_product IS 'Producto premium / tope de gama';
+COMMENT ON COLUMN public.business_context.brand_traits IS 'Rasgos de ADN de marca (p. ej. Moderno, Premium)';
+COMMENT ON COLUMN public.business_context.unique_differential IS 'Diferencial único frente a la competencia';
+COMMENT ON COLUMN public.business_context.target_gender IS 'Género del público objetivo';
+COMMENT ON COLUMN public.business_context.target_age_center IS 'Edad central del rango objetivo (13–100)';
+COMMENT ON COLUMN public.business_context.geographic_proximity IS 'Si el cliente debe vivir cerca del negocio físico';
+COMMENT ON COLUMN public.business_context.social_objective IS 'Objetivo principal en redes sociales';
+COMMENT ON COLUMN public.business_context.shop_data IS 'JSON con metrics y products (importación Tienda Nube / Shopify)';
 
 CREATE INDEX idx_business_context_user_id ON public.business_context (user_id);
 

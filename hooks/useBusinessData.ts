@@ -2,32 +2,35 @@
 
 import { useCallback, useEffect, useState } from "react";
 import type { PostgrestError } from "@supabase/supabase-js";
+import {
+  IDENTITY_EXTENDED_DEFAULT,
+  identityExtendedFromRow,
+  identityFieldsForUpsert,
+  type IdentityExtendedState,
+} from "@/components/IdentityProductsAudience";
+import {
+  AVAILABILITY_HOURS_DEFAULT,
+  type BusinessContextRow,
+} from "@/lib/database";
+import type { ShopImportResult } from "@/src/services/shopIntegration";
+import { upsertBusinessContext } from "@/lib/services/businessContext";
 import { supabase } from "@/lib/supabase";
 
-/** Fila de `public.business_context` (alineada a la migración SQL). */
-export type BusinessContextRow = {
-  id: string;
-  user_id: string;
-  name: string;
-  rubro: string;
-  description: string | null;
-  availability_days: number;
-  shopify_url: string | null;
-  tienda_nube_url: string | null;
-  product_image_urls: string[];
-  created_at: string;
-  updated_at: string;
-};
+export type { BusinessContextRow };
 
 /** Campos editables al crear o actualizar el negocio. */
 export type BusinessContextInput = {
   name: string;
   rubro: string;
   description?: string | null;
-  availability_days?: number;
+  availability_hours?: number;
   shopify_url?: string | null;
   tienda_nube_url?: string | null;
   product_image_urls?: string[];
+  /** Si no se envía, se conserva el bloque de identidad extendida ya guardado. */
+  identityExtended?: IdentityExtendedState;
+  /** Si no se envía, se conserva `shop_data` ya guardado. */
+  shop_data?: ShopImportResult | null;
 };
 
 export type UseBusinessDataResult = {
@@ -111,22 +114,30 @@ export function useBusinessData(): UseBusinessDataResult {
         return false;
       }
 
+      const identity =
+        input.identityExtended ??
+        (data ? identityExtendedFromRow(data) : IDENTITY_EXTENDED_DEFAULT);
+
+      const shopData =
+        input.shop_data !== undefined
+          ? input.shop_data
+          : (data?.shop_data ?? null);
+
       const payload = {
         user_id: user.id,
         name: input.name,
         rubro: input.rubro,
         description: input.description ?? null,
-        availability_days: input.availability_days ?? 3,
+        availability_hours: input.availability_hours ?? AVAILABILITY_HOURS_DEFAULT,
         shopify_url: input.shopify_url ?? null,
         tienda_nube_url: input.tienda_nube_url ?? null,
         product_image_urls: input.product_image_urls ?? [],
+        ...identityFieldsForUpsert(identity),
+        shop_data: shopData,
       };
 
-      const { data: row, error: upsertError } = await supabase
-        .from("business_context")
-        .upsert(payload, { onConflict: "user_id" })
-        .select()
-        .single();
+      const { data: row, error: upsertError } =
+        await upsertBusinessContext(supabase, payload);
 
       if (upsertError) {
         setError(upsertError);
@@ -138,7 +149,7 @@ export function useBusinessData(): UseBusinessDataResult {
       setSaving(false);
       return true;
     },
-    [],
+    [data],
   );
 
   return {
