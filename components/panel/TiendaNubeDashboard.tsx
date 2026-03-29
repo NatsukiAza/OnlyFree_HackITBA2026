@@ -134,7 +134,7 @@ export function TiendaNubeDashboard() {
           Todavía no importamos tu tienda
         </h2>
         <p className="mx-auto mt-3 max-w-md text-on-surface-variant">
-          Cuando conectés Tienda Nube desde{" "}
+          Cuando te conectés desde{" "}
           <span className="font-semibold text-on-surface">Mi negocio</span>, acá
           vas a ver ventas simuladas, productos destacados y carritos
           abandonados para tu estrategia.

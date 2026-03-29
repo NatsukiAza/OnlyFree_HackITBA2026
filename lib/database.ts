@@ -41,8 +41,9 @@ export type BusinessContextRow = {
   premium_product: string | null;
   brand_traits: string[];
   unique_differential: string | null;
-  target_gender: TargetGender;
-  target_age_center: number;
+  target_genders: TargetGender[];
+  target_age_min: number;
+  target_age_max: number;
   geographic_proximity: boolean;
   social_objective: SocialObjective;
   /** Importación tienda (JSONB); puede faltar en filas antiguas. */
@@ -66,8 +67,9 @@ export type BusinessContextUpsertPayload = {
   premium_product: string | null;
   brand_traits: string[];
   unique_differential: string | null;
-  target_gender: TargetGender;
-  target_age_center: number;
+  target_genders: TargetGender[];
+  target_age_min: number;
+  target_age_max: number;
   geographic_proximity: boolean;
   social_objective: SocialObjective;
   shop_data: ShopImportResult | null;
