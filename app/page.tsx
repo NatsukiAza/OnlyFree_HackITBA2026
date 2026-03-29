@@ -5,10 +5,10 @@ export default function HomePage() {
     <div className="flex min-h-screen flex-col items-center justify-center bg-background px-6 py-16">
       <div className="mx-auto max-w-2xl text-center">
         <p className="mb-3 text-xs font-bold uppercase tracking-widest text-primary">
-          Editorial Studio
+          MarketMate
         </p>
         <h1 className="mb-6 text-4xl font-extrabold tracking-tight text-on-background md:text-5xl">
-          Tu community manager automático, sin complicarte con el marketing.
+          Tu propio generador de estrategias de marketing automatizado.
         </h1>
         <p className="mb-10 text-lg leading-relaxed text-on-surface-variant">
           Analizá tu negocio, seguí las tendencias y recibí cada semana qué
@@ -22,7 +22,7 @@ export default function HomePage() {
             Entrar o registrarse
           </Link>
           <Link
-            href="/login?next=/mi-negocio"
+            href="/login?next=/panel"
             className="inline-flex items-center justify-center rounded-xl border border-outline-variant/40 bg-surface-container-lowest px-8 py-3.5 text-sm font-semibold text-on-background transition-colors hover:bg-surface-container-low"
           >
             Ir al panel

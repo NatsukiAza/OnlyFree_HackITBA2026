@@ -12,6 +12,8 @@ import {
 } from "@/lib/database";
 import {
   importShopData,
+  mergeShopAndManualImageUrls,
+  MOCK_GALLERY_IMAGE_URLS,
   SHOP_PLATFORM_LABEL,
   type ShopImportResult,
   type ShopPlatform,
@@ -26,13 +28,11 @@ import {
   validateIdentityProducts,
   type IdentityExtendedState,
 } from "@/components/IdentityProductsAudience";
+import { BUSINESS_PROFILE_UPDATED_EVENT } from "@/lib/appEvents";
 import { upsertBusinessContext } from "@/lib/services/businessContext";
 
-const PLACEHOLDER_IMAGES = [
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuArI73gA8cMjcUSSYBfqi75jtNBvE_7U5W7O7okEuOA7otkD9yxbxSO2H7HoX5UM5k07_N8rLHGXvIS2js5F-rpGNdWVQuoTN3shYYF_rTXnUYOGFoOJFwQd1uWEWs-bQsbL50BHk_TbKfbs4rUqmyaVatAmAv1J1zvAt1MTxHcmNseBDWKr325DN3M7W23NWMdFnIWMKAVR_sMVd_bliiq0MXsBxnY-QLI4CUZ7lDJKKnqRUswVvkgvzc45ERyOlnjP_s_lM7G6xua",
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuDU8XF3zRehXD6Ojd1o-zElz-VrwKEvWUucymkEQGoqzxNQ7rbKeGJCpgs3rweYaBY-d8YERctCaePn57RlYHQJEzpnh4kNAFcJ0ZVBelhN_vAl-9GIPa71fNw5kLKR_oMDg34ziDnrXXNGChy6mKN-LW-JIp3PRZlOI1yyghakwTc6f_iyD7ZxohzFbeh8sGsS9wtVWhuPfMk7f39UlPVH5uGHo3ERK-daVtkRl0PKt91Rbd3ulzkkhhtuxckS5GRo1ysytWX_p1Rs",
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuCSZnoz2oqx3gc7K-z9V8xeqNvVC28kQ_idt-anzjrzhPA0QZ9Y1QeX4MadDZAARWcbh2QFgIWcbqK3WkdsOiUdaQICEWTsZgh05muP2jjSxv85bas-vhuEo2lSIo8a6Soym_4YxEbWBrYJEILtH4fOMcCR2QVw_WDLGG5UnO2eDBaIwgL6rinWmUmx6aApPOkVjzn8Ex5BW4KuIncri_jfpZ4IZkMmrzjGqyrq6Z8k8VG9xQRi4igsBK7eJmkDaLu78XKp9k0mcctA",
-];
+/** Tamaño máximo por archivo local hasta integrar Cloudinary. */
+const ASSET_IMAGE_MAX_BYTES = 1.5 * 1024 * 1024;
 
 function isValidHttpUrl(value: string): boolean {
   try {
@@ -85,6 +85,12 @@ function validateIdentityBasics(ctx: {
   return null;
 }
 
+function notifyBusinessProfileUpdated() {
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new CustomEvent(BUSINESS_PROFILE_UPDATED_EVENT));
+  }
+}
+
 export function BusinessForm({ formId = "business-onboarding-form" }: { formId?: string }) {
   const router = useRouter();
   const supabase = useMemo(
@@ -112,8 +118,23 @@ export function BusinessForm({ formId = "business-onboarding-form" }: { formId?:
   const [importingShop, setImportingShop] = useState<ShopPlatform | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const [productImageUrls, setProductImageUrls] = useState<string[]>([]);
+  /** URLs del mock ocultadas al tocar (solo vista prevía; no se persisten). */
+  const [hiddenMockGalleryUrls, setHiddenMockGalleryUrls] = useState<string[]>(
+    [],
+  );
   const [imageUrlInput, setImageUrlInput] = useState("");
   const imageUrlInputRef = useRef<HTMLInputElement>(null);
+  const assetFileInputRef = useRef<HTMLInputElement>(null);
+
+  /** Sin fotos guardadas: mostramos la galería del mock de Tiendanube (mismo catálogo que el import). */
+  const galleryDisplayUrls = useMemo(() => {
+    if (productImageUrls.length > 0) return productImageUrls;
+    return MOCK_GALLERY_IMAGE_URLS.filter(
+      (u) => !hiddenMockGalleryUrls.includes(u),
+    );
+  }, [productImageUrls, hiddenMockGalleryUrls]);
+
+  const isShowingMockGallery = productImageUrls.length === 0;
 
   const [identityExtended, setIdentityExtended] =
     useState<IdentityExtendedState>(IDENTITY_EXTENDED_DEFAULT);
@@ -131,6 +152,7 @@ export function BusinessForm({ formId = "business-onboarding-form" }: { formId?:
     setTiendaNubeUrl(row.tienda_nube_url ?? "");
     setShopifyUrl(row.shopify_url ?? "");
     setProductImageUrls(row.product_image_urls ?? []);
+    setHiddenMockGalleryUrls([]);
     setIdentityExtended(identityExtendedFromRow(row));
     setShopData(
       row.shop_data != null && typeof row.shop_data === "object"
@@ -181,7 +203,10 @@ export function BusinessForm({ formId = "business-onboarding-form" }: { formId?:
           availability_hours: availabilityHours,
           tienda_nube_url: tiendaNubeUrl.trim() || null,
           shopify_url: shopifyUrl.trim() || null,
-          product_image_urls: productImageUrls,
+          product_image_urls: mergeShopAndManualImageUrls(
+            imported,
+            productImageUrls,
+          ),
           ...identityFieldsForUpsert(identityExtended),
           shop_data: imported,
         };
@@ -196,6 +221,7 @@ export function BusinessForm({ formId = "business-onboarding-form" }: { formId?:
 
         if (saved) {
           applyRow(saved as BusinessContextRow);
+          notifyBusinessProfileUpdated();
           setToast(
             `Se han importado exitosamente ${imported.products.length} productos de ${SHOP_PLATFORM_LABEL[platform]}.`,
           );
@@ -276,6 +302,56 @@ export function BusinessForm({ formId = "business-onboarding-form" }: { formId?:
     setImageUrlInput("");
     setErrorMessage(null);
   };
+
+  const handleAssetFileSelected = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      e.target.value = "";
+      if (!file) return;
+      if (!file.type.startsWith("image/")) {
+        setErrorMessage("Elegí un archivo de imagen (JPG, PNG, WebP…).");
+        return;
+      }
+      if (file.size > ASSET_IMAGE_MAX_BYTES) {
+        setErrorMessage(
+          `El archivo supera ${Math.round((ASSET_IMAGE_MAX_BYTES / (1024 * 1024)) * 10) / 10} MB. Cuando conectes Cloudinary podrás optimizar subidas más pesadas.`,
+        );
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = () => {
+        const dataUrl =
+          typeof reader.result === "string" ? reader.result : "";
+        if (!dataUrl) return;
+        setProductImageUrls((prev) => [...prev, dataUrl]);
+        setErrorMessage(null);
+        setToast(
+          "Imagen agregada. Guardá los cambios. Podés reemplazar esto por Cloudinary cuando subas a la nube.",
+        );
+      };
+      reader.onerror = () => {
+        setErrorMessage("No se pudo leer el archivo. Probá con otra imagen.");
+      };
+      reader.readAsDataURL(file);
+    },
+    [],
+  );
+
+  const removeGalleryImageAt = useCallback(
+    (index: number) => {
+      const url = galleryDisplayUrls[index];
+      if (!url) return;
+      if (productImageUrls.length > 0) {
+        setProductImageUrls((prev) => prev.filter((_, i) => i !== index));
+      } else {
+        setHiddenMockGalleryUrls((prev) =>
+          prev.includes(url) ? prev : [...prev, url],
+        );
+      }
+      setErrorMessage(null);
+    },
+    [galleryDisplayUrls, productImageUrls.length],
+  );
 
   const goToNextStep = () => {
     if (carouselIndex === 0) {
@@ -364,7 +440,10 @@ export function BusinessForm({ formId = "business-onboarding-form" }: { formId?:
       availability_hours: availabilityHours,
       tienda_nube_url: tiendaNubeUrl.trim() || null,
       shopify_url: shopifyUrl.trim() || null,
-      product_image_urls: productImageUrls,
+      product_image_urls: mergeShopAndManualImageUrls(
+        shopData,
+        productImageUrls,
+      ),
       ...identityFieldsForUpsert(identityExtended),
       shop_data: shopData,
     };
@@ -376,6 +455,7 @@ export function BusinessForm({ formId = "business-onboarding-form" }: { formId?:
       setErrorMessage(upsertError.message);
     } else if (saved) {
       applyRow(saved as BusinessContextRow);
+      notifyBusinessProfileUpdated();
       setStatusMessage(
         isDraft ? "Borrador guardado." : "Datos guardados correctamente.",
       );
@@ -849,32 +929,58 @@ export function BusinessForm({ formId = "business-onboarding-form" }: { formId?:
                 </button>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+              <input
+                ref={assetFileInputRef}
+                type="file"
+                accept="image/*"
+                className="sr-only"
+                aria-hidden
+                tabIndex={-1}
+                onChange={handleAssetFileSelected}
+              />
+
+              {isShowingMockGallery ? (
+                <p className="mb-3 text-xs text-on-surface-variant">
+                  Vista prevía del catálogo mock (mismas fotos que importa Tienda
+                  Nube). Importá la tienda o agregá fotos para reemplazarlas al
+                  guardar.
+                </p>
+              ) : null}
+
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
                 <button
                   type="button"
                   className="group flex aspect-square cursor-pointer items-center justify-center rounded-xl border-2 border-dashed border-outline-variant/30 transition-colors hover:border-primary"
-                  onClick={() => imageUrlInputRef.current?.focus()}
+                  onClick={() => assetFileInputRef.current?.click()}
+                  title="Agregar imagen desde tu equipo"
                 >
                   <span className="material-symbols-outlined text-slate-400 transition-colors group-hover:text-primary">
                     add_a_photo
                   </span>
                 </button>
-                {[0, 1, 2].map((index) => (
-                  <div
-                    key={index}
-                    className="group relative aspect-square overflow-hidden rounded-xl"
+                {galleryDisplayUrls.map((url, index) => (
+                  <button
+                    key={`${url.slice(0, 80)}-${index}`}
+                    type="button"
+                    title="Quitar imagen"
+                    aria-label="Quitar imagen de la galería"
+                    className="group relative aspect-square overflow-hidden rounded-xl border-0 p-0 text-left outline-none ring-primary/40 focus-visible:ring-2"
+                    onClick={() => removeGalleryImageAt(index)}
                   >
                     <img
                       alt=""
-                      className="h-full w-full object-cover grayscale transition-all duration-500 group-hover:grayscale-0"
-                      src={productImageUrls[index] ?? PLACEHOLDER_IMAGES[index]}
+                      className="pointer-events-none h-full w-full object-cover grayscale transition-all duration-500 group-hover:grayscale-0"
+                      src={url}
                     />
-                    <div className="absolute inset-0 flex items-center justify-center bg-primary/20 opacity-0 transition-opacity group-hover:opacity-100">
-                      <span className="material-symbols-outlined text-white">
-                        check_circle
+                    <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-end bg-gradient-to-t from-black/55 via-black/10 to-transparent pb-3 opacity-90 sm:opacity-0 sm:transition-opacity sm:group-hover:opacity-100">
+                      <span className="material-symbols-outlined text-2xl text-white drop-shadow">
+                        delete
+                      </span>
+                      <span className="mt-0.5 text-[11px] font-medium text-white/95 drop-shadow">
+                        Tocá para quitar
                       </span>
                     </div>
-                  </div>
+                  </button>
                 ))}
               </div>
             </div>

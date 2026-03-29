@@ -126,3 +126,15 @@ export function extractImagePrompt(
 
   return stripMarkdownLite(fallbackTitle);
 }
+
+/**
+ * Quita el bloque `[prompt: ...]` para mostrar la card sin el texto técnico de imagen.
+ * El `body` original debe seguir usándose en `extractImagePrompt` y enlaces IA.
+ */
+export function stripStrategyPromptForDisplay(body: string): string {
+  return body
+    .replace(/\[prompt:\s*[\s\S]+?\]/gi, "")
+    .replace(/[ \t]+\n/g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}

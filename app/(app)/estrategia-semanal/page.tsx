@@ -4,7 +4,7 @@ import { EstrategiaSemanalView } from "./EstrategiaSemanalView";
 
 export default function EstrategiaSemanalPage() {
   return (
-    <main className="ml-64 px-8 pb-12 pt-24">
+    <main className="px-8 pb-12 pt-24">
       <div className="mx-auto max-w-5xl">
         <Suspense
           fallback={

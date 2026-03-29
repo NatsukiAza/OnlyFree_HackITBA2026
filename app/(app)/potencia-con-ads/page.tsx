@@ -1,6 +1,6 @@
 export default function PotenciaConAdsPage() {
   return (
-    <main className="ml-64 min-h-screen px-8 pb-12 pt-24">
+    <main className="min-h-screen px-8 pb-12 pt-24">
       <div className="mx-auto max-w-[1600px]">
         <div className="flex flex-col gap-8 lg:flex-row">
           <section className="flex flex-1 flex-col gap-6">

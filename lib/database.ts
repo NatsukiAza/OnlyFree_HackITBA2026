@@ -2,6 +2,16 @@
  * Tipos alineados con `public.business_context` en Supabase.
  */
 
+/** Fila de `public.profiles`. */
+export type ProfileRow = {
+  id: string;
+  display_name: string | null;
+  avatar_url: string | null;
+  username: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
 import type { ShopImportResult } from "@/src/services/shopIntegration";
 
 /** Horas por semana dedicadas al marketing (rango permitido en DB). */

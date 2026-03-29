@@ -4,7 +4,11 @@ import Link from "next/link";
 import { useCallback, useMemo, useState, type ReactNode } from "react";
 import ReactMarkdown from "react-markdown";
 
-import { extractImagePrompt } from "@/lib/pollinations";
+import {
+  extractN8nAutomationPayload,
+  stripN8nAutomationForDisplay,
+} from "@/lib/extractN8nAutomationPayload";
+import { extractImagePrompt, stripStrategyPromptForDisplay } from "@/lib/pollinations";
 
 import type { EstrategiaDayItem } from "./types";
 
@@ -53,30 +57,80 @@ export type EstrategiaDayCardProps = {
 };
 
 export function EstrategiaDayCard({ item, showTopAccent }: EstrategiaDayCardProps) {
-  const [copied, setCopied] = useState(false);
+  const [n8nPending, setN8nPending] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
 
   const hasIaImage = /ia\s*image/i.test(item.body);
+
+  /** Tarea de email / recuperación con n8n (etiqueta del agente o herramienta n8n + email). */
+  const hasEmailN8nTask =
+    /\[email_n8n\]/i.test(item.body) ||
+    (/\bherramienta:\s*[^\n]*n8n/i.test(item.body) &&
+      /email|mailing|carrito|abandonad|recuperación|VOLVE10/i.test(item.body));
 
   const suggestedPrompt = useMemo(() => {
     if (!hasIaImage) return "";
     return extractImagePrompt(item.body, item.title);
   }, [hasIaImage, item.body, item.title]);
 
-  const plainTextForCopy = `${item.title}\n\n${item.body}`.trim();
+  /** Card sin prompt de imagen ni metadata n8n; `item.body` sigue completo para IA / webhook. */
+  const displayBody = useMemo(
+    () =>
+      stripN8nAutomationForDisplay(stripStrategyPromptForDisplay(item.body)),
+    [item.body],
+  );
 
-  const handleCopy = useCallback(async () => {
+  const handleN8nSimulate = useCallback(async () => {
+    const { emailCliente, nombreProducto, codigoCupon, urlCarrito } =
+      extractN8nAutomationPayload(item.body);
+
+    setN8nPending(true);
+    setToast(null);
     try {
-      await navigator.clipboard.writeText(plainTextForCopy);
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 2000);
+      const res = await fetch("/api/automation/n8n", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          emailCliente,
+          nombreProducto,
+          codigoCupon,
+          urlCarrito,
+          source: "estrategia-semanal",
+          title: item.title,
+          body: item.body,
+        }),
+      });
+      const data = (await res.json()) as {
+        message?: string;
+        ok?: boolean;
+        error?: string;
+      };
+
+      if (res.ok && data.ok) {
+        setToast("¡Automatización enviada a n8n!");
+        window.setTimeout(() => setToast(null), 4500);
+        return;
+      }
+
+      window.alert(
+        typeof data.error === "string"
+          ? data.error
+          : typeof data.message === "string"
+            ? data.message
+            : "No se pudo completar la acción.",
+      );
     } catch {
-      /* ignore */
+      window.alert("No se pudo contactar al servidor. Probá de nuevo.");
+    } finally {
+      setN8nPending(false);
     }
-  }, [plainTextForCopy]);
+  }, [item.body, item.title]);
 
   const dayNumberClass = item.emphasized
     ? "text-3xl font-black leading-none text-primary"
     : "text-3xl font-black leading-none text-on-surface-variant opacity-50";
+
+  const showCalendarColumn = item.showCalendarColumn !== false;
 
   return (
     <div className="group relative overflow-hidden rounded-[1.5rem] bg-surface-container-lowest p-8 transition-all hover:translate-y-[-4px]">
@@ -87,42 +141,37 @@ export function EstrategiaDayCard({ item, showTopAccent }: EstrategiaDayCardProp
       ) : null}
 
       <div className="flex flex-col items-start gap-8 md:flex-row">
-        <div className="min-w-[80px] flex-shrink-0 text-center">
-          <span className={`block ${dayNumberClass}`}>{item.calendarDay}</span>
-          <span className="mt-1 block text-xs font-bold uppercase text-on-surface-variant">
-            {item.weekday}
-          </span>
-        </div>
+        {showCalendarColumn ? (
+          <div className="min-w-[80px] flex-shrink-0 text-center">
+            <span className={`block ${dayNumberClass}`}>{item.calendarDay}</span>
+            <span className="mt-1 block text-xs font-bold uppercase text-on-surface-variant">
+              {item.weekday}
+            </span>
+          </div>
+        ) : null}
 
-        <div className="flex-1 space-y-4">
-          <div className="flex items-center justify-between gap-2">
-            <h3 className="text-xl font-bold text-on-surface">{item.title}</h3>
-            <div className="flex shrink-0 items-center gap-2">
-              {item.trendLabel ? (
-                <span className="flex max-w-[min(100%,14rem)] scale-100 cursor-default items-center gap-1 rounded-full bg-tertiary-container px-3 py-1 text-xs font-bold text-on-tertiary-container transition-transform hover:scale-105">
-                  <span
-                    className="material-symbols-outlined shrink-0 text-sm"
-                    style={{ fontVariationSettings: "'FILL' 1" }}
-                  >
-                    local_fire_department
-                  </span>
-                  <span className="truncate">Tendencia: {item.trendLabel}</span>
+        <div className={showCalendarColumn ? "flex-1 space-y-4" : "w-full space-y-4"}>
+          <div className="flex flex-wrap items-start justify-between gap-2">
+            <h3 className="min-w-0 flex-1 text-xl font-bold text-on-surface">
+              {item.title}
+            </h3>
+            {item.trendLabel ? (
+              <span className="flex max-w-[min(100%,14rem)] shrink-0 scale-100 cursor-default items-center gap-1 rounded-full bg-tertiary-container px-3 py-1 text-xs font-bold text-on-tertiary-container transition-transform hover:scale-105">
+                <span
+                  className="material-symbols-outlined shrink-0 text-sm"
+                  style={{ fontVariationSettings: "'FILL' 1" }}
+                >
+                  local_fire_department
                 </span>
-              ) : null}
-              <button
-                type="button"
-                className="p-2 text-outline transition-colors hover:text-on-surface"
-                aria-label="Más opciones"
-              >
-                <span className="material-symbols-outlined">more_horiz</span>
-              </button>
-            </div>
+                <span className="truncate">Tendencia: {item.trendLabel}</span>
+              </span>
+            ) : null}
           </div>
 
           <div className="text-sm leading-relaxed">
-            {item.body.trim() ? (
+            {displayBody.trim() ? (
               <ReactMarkdown components={bodyMarkdownComponents}>
-                {item.body}
+                {displayBody}
               </ReactMarkdown>
             ) : (
               <p className="text-on-surface-variant">—</p>
@@ -130,16 +179,6 @@ export function EstrategiaDayCard({ item, showTopAccent }: EstrategiaDayCardProp
           </div>
 
           <div className="flex flex-wrap gap-4 pt-2">
-            <button
-              type="button"
-              onClick={() => void handleCopy()}
-              className="group/btn flex items-center gap-2 rounded-lg bg-surface-container-low px-4 py-2 text-sm font-bold text-on-surface transition-colors hover:bg-primary/5"
-            >
-              <span className="material-symbols-outlined text-lg text-primary">
-                content_copy
-              </span>
-              {copied ? "Copiado" : "Copiar al portapapeles"}
-            </button>
             {hasIaImage && (
               <Link
                 href={`/contenido-ia?prompt=${encodeURIComponent(suggestedPrompt)}`}
@@ -149,26 +188,49 @@ export function EstrategiaDayCard({ item, showTopAccent }: EstrategiaDayCardProp
                 Generar ahora con IA
               </Link>
             )}
+            {hasEmailN8nTask && (
+              <button
+                type="button"
+                disabled={n8nPending}
+                onClick={() => void handleN8nSimulate()}
+                className="flex items-center gap-2 rounded-lg bg-secondary/15 px-4 py-2 text-sm font-bold text-secondary transition-colors hover:bg-secondary/25 disabled:opacity-60"
+              >
+                <span className="material-symbols-outlined text-lg">
+                  hub
+                </span>
+                {n8nPending ? "Enviando…" : "Automatizar con n8n"}
+              </button>
+            )}
           </div>
         </div>
 
         <div className="flex flex-col items-center justify-center gap-3 pt-2 md:pt-0">
           <label className="flex cursor-pointer flex-col items-center gap-3">
             <input className="peer sr-only" type="checkbox" />
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-surface-container-low transition-all peer-checked:bg-primary/10 peer-checked:ring-2 peer-checked:ring-primary">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl border-2 border-outline-variant/40 bg-surface-container-low transition-all peer-checked:border-emerald-800 peer-checked:bg-emerald-600 peer-checked:shadow-inner">
               <span
-                className="material-symbols-outlined text-transparent transition-colors peer-checked:text-primary"
-                style={{ fontVariationSettings: "'wght' 700" }}
+                className="material-symbols-outlined text-transparent transition-colors peer-checked:text-white"
+                style={{ fontVariationSettings: "'FILL' 1, 'wght' 700" }}
               >
                 check
               </span>
             </div>
-            <span className="text-[10px] font-black uppercase tracking-tighter text-on-surface-variant peer-checked:text-primary">
+            <span className="text-[10px] font-black uppercase tracking-tighter text-on-surface-variant peer-checked:text-emerald-800">
               Completado
             </span>
           </label>
         </div>
       </div>
+
+      {toast ? (
+        <div
+          role="status"
+          aria-live="polite"
+          className="fixed bottom-6 right-6 z-[100] max-w-md rounded-2xl bg-on-surface px-5 py-4 text-sm font-medium text-white shadow-2xl"
+        >
+          {toast}
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -193,13 +255,15 @@ export function EstrategiaSemanalCardList({
     );
   }
 
+  const accentIndex = items.findIndex((i) => i.showCalendarColumn !== false);
+
   return (
     <div className="flex flex-col gap-6">
       {items.map((item, index) => (
         <EstrategiaDayCard
           key={item.id}
           item={item}
-          showTopAccent={index === 0}
+          showTopAccent={accentIndex >= 0 ? index === accentIndex : index === 0}
         />
       ))}
     </div>

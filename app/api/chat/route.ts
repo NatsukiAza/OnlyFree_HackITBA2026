@@ -53,6 +53,76 @@ function formatShopMetrics(shopData: unknown): string {
   return lines.length > 0 ? lines.join("\n") : JSON.stringify(m, null, 2);
 }
 
+function formatAbandonedCheckouts(shopData: unknown): string {
+  if (shopData == null || typeof shopData !== "object") {
+    return "(Sin shop_data; no hay carritos abandonados.)";
+  }
+  const raw = shopData as {
+    abandoned_checkouts?: Array<{
+      email?: string;
+      product_name?: string;
+      amount?: number;
+    }>;
+  };
+  const list = raw.abandoned_checkouts;
+  if (!Array.isArray(list) || list.length === 0) {
+    return "(No hay carritos abandonados listados en shop_data.)";
+  }
+  return list
+    .map((row, i) => {
+      const email = row.email ?? "(sin email)";
+      const product = row.product_name ?? "(producto)";
+      const amt =
+        row.amount != null && Number.isFinite(row.amount)
+          ? ` — monto aprox. $${row.amount}`
+          : "";
+      return `${i + 1}. ${email} · ${product}${amt}`;
+    })
+    .join("\n");
+}
+
+/**
+ * Lista URLs de shop_data.products[].images (+ image_url) para que el modelo
+ * infiera aspecto del producto (sin pasar URLs al prompt de Flux).
+ */
+function formatShopProductVisualRefs(shopData: unknown): string {
+  if (shopData == null || typeof shopData !== "object") {
+    return "(Sin shop_data; no hay referencias visuales de productos.)";
+  }
+  const raw = shopData as {
+    products?: Array<{
+      name?: string;
+      images?: string[];
+      image_url?: string;
+    }>;
+  };
+  const products = raw.products;
+  if (!Array.isArray(products) || products.length === 0) {
+    return "(Sin productos en shop_data; no hay imágenes de referencia.)";
+  }
+
+  const blocks: string[] = [];
+  for (let i = 0; i < products.length; i++) {
+    const p = products[i];
+    const name = p.name ?? `Producto ${i + 1}`;
+    const fromImages = Array.isArray(p.images) ? p.images : [];
+    const primary = p.image_url?.trim();
+    const urls = [
+      ...fromImages,
+      ...(primary && !fromImages.includes(primary) ? [primary] : []),
+    ];
+    const unique = [...new Set(urls.filter(Boolean))];
+    if (unique.length === 0) continue;
+
+    const lines = unique.map((u, j) => `   • Ref. ${j + 1}: ${u}`);
+    blocks.push(`[${i}] ${name}\n${lines.join("\n")}`);
+  }
+
+  return blocks.length > 0
+    ? blocks.join("\n\n")
+    : "(Ningún producto tiene URLs en images[] ni image_url.)";
+}
+
 function buildSystemPrompt(ctx: {
   businessName: string;
   rubro: string;
@@ -60,16 +130,34 @@ function buildSystemPrompt(ctx: {
   availabilityHours: number;
   shopProducts: string;
   shopMetrics: string;
+  shopAbandonedCheckouts: string;
+  shopProductVisualRefs: string;
 }): string {
-  return `Actúa como un Director de Marketing Digital. Tu tarea es generar un Plan Semanal de Acción basado estrictamente en las availability_hours del usuario.
+  return `Actúa como un Director de Marketing Digital que le esta dando ideas a un novato con un negocio pequeño-mediano que no sabe terminos complicados ni terminologias.
+
+Tu tarea es generar un Plan Semanal de Acción basado estrictamente en las availability_hours del usuario.
 
 HERRAMIENTAS DISPONIBLES (Debes mencionarlas en las tareas):
+
+Publicaciones de instagram, historias, reels para promocionar el negocio o generar interaccion.
 
 Generador de Imágenes IA: Úsalo para tareas de diseño de producto o fotos lifestyle.
 
 Automatización n8n: Úsalo para recupero de carritos, emails automáticos o sincronización de stock.
 
 Métricas de Tienda: Prioriza los 'Best Sellers' extraídos del shop_data.
+
+RECUPERACIÓN DE CARRITOS (OBLIGATORIO si hay datos):
+- En CONTEXTO DEL NEGOCIO vas a ver "Carritos abandonados (shop_data)". Si esa sección lista uno o más carritos (emails y productos), DEBES incluir al menos UNA tarea de email marketing orientada a recuperación con Herramienta: n8n (no solo "Manual").
+- En esa tarea, redactá el contenido del email en español claro:
+  - Línea "Asunto del email:" (una sola línea, persuasiva).
+  - Línea "Cuerpo del email:" seguido de un párrafo o texto breve que invite a completar la compra y mencione el cupón de descuento ficticio VOLVE10 (sin decir que es ficticio).
+- Justo antes de la línea [email_n8n], incluí EXACTAMENTE estas cuatro líneas (para automatización n8n), rellenando con datos coherentes del carrito que priorices:
+  emailCliente: <email>
+  nombreProducto: <nombre del producto olvidado>
+  codigoCupon: VOLVE10
+  urlCarrito: <URL ficticia pero creíble del checkout o recuperación de carrito>
+- Al final del bloque de esa tarea (después de Por qué y de las cuatro líneas anteriores), agregá una línea sola con la etiqueta [email_n8n] para que la app muestre el botón de automatización.
 
 REGLAS DE DISTRIBUCIÓN DE TIEMPO:
 
@@ -78,6 +166,13 @@ Si el usuario tiene < 5hs: Máximo 2 tareas de alto impacto.
 Si tiene 5-15hs: 3 a 4 tareas mezclando contenido y automatización.
 
 Si tiene > 15hs: Plan diario completo (lunes a viernes).
+
+GENERACIÓN DE IMÁGENES IA (cuando la Herramienta sea "IA Image" o equivalente):
+- Usá el contexto visual de los productos del negocio cuando sugieras "Generar imagen con IA" o tareas de foto de producto / lifestyle.
+- Referencias: en CONTEXTO DEL NEGOCIO tenés "Referencias visuales (imágenes por producto)" con URLs de shop_data.products[x].images (y image_url si aplica). Analizá mentalmente qué muestran: color, forma, materiales, texturas y detalles del producto real.
+- Prompt técnico: en la línea de Acción incluí una descripción visual detallada EN INGLÉS entre corchetes [prompt: ...] (minúsculas "prompt", una sola etiqueta) para el generador Flux. Describí una escena fotorrealista tipo lifestyle donde el producto sea el protagonista, coherente con las referencias.
+- PROHIBIDO poner URLs dentro de [prompt: ...]; solo texto descriptivo. No copies ni pegues enlaces en el prompt de imagen.
+- Sé específico: si las referencias sugieren un mouse negro mate, no pidas un "gaming mouse" genérico; pedí por ejemplo "a matte black ergonomic mouse with subtle RGB lighting, visually matching the reference product". Adaptá el ejemplo al producto y a lo que infieras de las referencias.
 
 FORMATO DE SALIDA:
 No saludes. No digas 'Aquí tienes tu plan'. Genera directamente los días en este formato:
@@ -91,15 +186,15 @@ Para la vista en la app, cada día o bloque principal debe empezar con un encabe
 ### [Día o nombre del bloque]: [Título corto]
 Luego el detalle en líneas con las etiquetas Acción / Herramienta / Por qué como texto o listas.
 
-Cuando la Herramienta sea "IA Image", en la línea de Acción incluí una descripción visual detallada en inglés entre corchetes [prompt: ...] que sirva como prompt para un generador de imágenes.
-
 CONTEXTO DEL NEGOCIO (úsalo para personalizar acciones y el "Por qué"):
 - Nombre: ${ctx.businessName}
 - Rubro: ${ctx.rubro}
 - Descripción: ${ctx.description}
 - Horas semanales disponibles (availability_hours): ${ctx.availabilityHours}
 - Catálogo / productos (shop_data): ${ctx.shopProducts}
-- Métricas de tienda (shop_data; priorizar best sellers alineados con estos datos): ${ctx.shopMetrics}`;
+- Referencias visuales (imágenes por producto; usalas para tareas IA Image, ver reglas arriba): ${ctx.shopProductVisualRefs}
+- Métricas de tienda (shop_data; priorizar best sellers alineados con estos datos): ${ctx.shopMetrics}
+- Carritos abandonados (shop_data): ${ctx.shopAbandonedCheckouts}`;
 }
 
 /**
@@ -220,7 +315,9 @@ export async function POST(request: Request) {
   }
 
   const shopProducts = formatShopProducts(row.shop_data);
+  const shopProductVisualRefs = formatShopProductVisualRefs(row.shop_data);
   const shopMetrics = formatShopMetrics(row.shop_data);
+  const shopAbandonedCheckouts = formatAbandonedCheckouts(row.shop_data);
 
   const system = buildSystemPrompt({
     businessName: row.name?.trim() || "(sin nombre)",
@@ -228,7 +325,9 @@ export async function POST(request: Request) {
     description: row.description?.trim() || "(no provista)",
     availabilityHours: row.availability_hours,
     shopProducts,
+    shopProductVisualRefs,
     shopMetrics,
+    shopAbandonedCheckouts,
   });
 
   const businessId = row.id;
